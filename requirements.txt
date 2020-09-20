@@ -1,4 +1,3 @@
-django
-mongoengine
-psycopg2
+flask
 rdflib
+neo4j
