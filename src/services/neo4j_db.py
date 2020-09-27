@@ -9,8 +9,24 @@ def get_resource_label(label):
     result = session.run("MATCH (n:Resource {rdfs__label: '" + label + "'}) -- (b) RETURN n AS resource")
     return [record["resource"] for record in result]
 
+def get_relation(node1, node2):
+    result = session.run("MATCH (n {id: '" + str(node1.id) + "'}) -[r]- (b {id: '" + str(node2.id) + "'}) RETURN r AS relation")
+    relation = [record["relation"] for record in result]
+    if (len(relation) == 0):
+        return {}
+    return [record["relation"] for record in result][0]
+
+def get_relation_cardinality(node1, node2):
+    cardinality = 0
+    result = session.run("MATCH (n {id: '" + str(node1.id) + "'}) -[r]- (b) RETURN COUNT(r) AS cardinality")
+    cardinality += [record["cardinality"] for record in result][0]
+    result = session.run("MATCH (n {id: '" + str(node2.id) + "'}) -[r]- (b) RETURN COUNT(r) AS cardinality")
+    cardinality += [record["cardinality"] for record in result][0]
+    return cardinality
+
 def get_cardinality_uri(resource_uri):
     return session.run("MATCH (:Resource {uri: '" + resource_uri + "'}) -[r]- (n) RETURN COUNT(r) AS cardinality")
+    return [record["cardinality"] for record in result][0]
 
 def get_cardinality_label(resource_label):
     result = session.run("MATCH (:Resource {rdfs__label: '" + resource_label + "'}) -[r]- (n) RETURN COUNT(r) AS cardinality")
@@ -47,5 +63,6 @@ def get_labels(nodes):
 def close_db():
     session.close()
     driver.close()
+
 
 close_db()
