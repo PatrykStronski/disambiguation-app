@@ -20,6 +20,24 @@ def get_related_nodes_label(label):
     result = session.run("MATCH (:Resource {rdfs__label: '" + label + "'}) -- (b) RETURN b AS resource")
     return [record["resource"] for record in result]
 
+def get_related_nodes_uri(uri):
+    result = session.run("MATCH (:Resource {uri: '" + uri + "'}) -- (b) RETURN b AS resource")
+    return [record["resource"] for record in result]
+
+def get_number_of_nodes():
+    result = session.run("MATCH (n:Resource) RETURN COUNT(n) AS qty")
+    return [record["qty"] for record in result][0]
+
+def get_node_by_index(ind):
+    result = session.run("MATCH (n:Resource) RETURN n AS resource SKIP " + str(ind) + " LIMIT 1")
+    return [record["resource"] for record in result][0]
+
+def get_uri_single_node(node):
+    return node["uri"]
+
+def get_label_single_node(node):
+    return node["rdfs__label"]
+
 def get_uris(nodes):
     return [node["uri"] for node in nodes]
 
@@ -30,5 +48,4 @@ def close_db():
     session.close()
     driver.close()
 
-#print(get_labels(get_resource_label("Canada@it")))
-#close_db()
+close_db()
