@@ -13,10 +13,10 @@ def get_relation(node1, node2):
     result = session.run("MATCH (n {id: '" + str(node1.id) + "'}) -[r]- (b {id: '" + str(node2.id) + "'}) RETURN r AS relation")
     relation = [record["relation"] for record in result]
     if (len(relation) == 0):
-        return {}
+        return
     return [record["relation"] for record in result][0]
 
-def get_relation_cardinality(node1, node2):
+def get_relation_uri_cardinality(node1, node2):
     cardinality = 0
     result = session.run("MATCH (n {id: '" + str(node1.id) + "'}) -[r]- (b) RETURN COUNT(r) AS cardinality")
     cardinality += [record["cardinality"] for record in result][0]
@@ -38,6 +38,10 @@ def get_related_nodes_label(label):
 
 def get_related_nodes_uri(uri):
     result = session.run("MATCH (:Resource {uri: '" + uri + "'}) -- (b) RETURN b AS resource")
+    return [record["resource"] for record in result]
+
+def get_related_nodes(node):
+    result = session.run("MATCH (n {id: '" + str(node.id) + "'}) -- (b) RETURN b AS resource")
     return [record["resource"] for record in result]
 
 def get_number_of_nodes():
@@ -65,4 +69,3 @@ def close_db():
     driver.close()
 
 
-close_db()

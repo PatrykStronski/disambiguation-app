@@ -24,7 +24,9 @@ def get_relations_probabilities(current_node, related_nodes):
     relation_weights = []
     for related_node in related_nodes:
         rel = neo4j_db.get_relation(current_node, related_node)
-        relation_weights.append({ "relation": rel, "weight": calculate_weight(current_node, related_node) })
+        print(rel)
+        if (rel):
+            relation_weights.append({ "relation": rel, "weight": calculate_weight(current_node, related_node) })
     overall_weight = weight_sum(relation_weights)
     return [{ "relation": weight["relation"], "probability": weight["weight"]/overall_weight } for weight in relation_weights]
 
@@ -36,17 +38,21 @@ def prepare_graph_for_node(ind, depth, threshold_probability, restart_probabilit
     for level in range(depth):
         related_nodes = []
         for current_node in base_nodes:
-            related_nodes = neo4j_db.get_related_nodes_uri(neo4j_db.get_uri_single_node(current_node))
+            related_nodes = neo4j_db.get_related_nodes(current_node)
+            print(related_nodes)
+            if (len(related_nodes) == 0):
+                continue
             #if (len(related_nodes) == 0 || should_restart(restart_probability)):
             #    return extract_strong_relations(relations, threshold_probability)
             relations = relations + get_relations_probabilities(current_node, related_nodes)
+            print(relations)
         base_nodes = related_nodes
     return extract_strong_relations(relations, threshold_probability)
 
 def prepare_graph(depth, threshold_probability, restart_probability):
     print("🏁 Preparation of graph started")
     node_qty = neo4j_db.get_number_of_nodes()
-    for ind in range(node_qty):
+    for ind in range(1,node_qty):
         unit_graph = prepare_graph_for_node(ind, depth, threshold_probability, restart_probability)
         print("Graph for " + str(ind) + " done")
         print(unit_graph)
