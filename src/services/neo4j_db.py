@@ -25,7 +25,7 @@ def get_relation_uri_cardinality(node1, node2):
     return cardinality
 
 def get_cardinality_uri(resource_uri):
-    return session.run("MATCH (:Resource {uri: '" + resource_uri + "'}) -[r]- (n) RETURN COUNT(r) AS cardinality")
+    result = session.run("MATCH (:Resource {uri: '" + resource_uri + "'}) -[r]- (n) RETURN COUNT(r) AS cardinality")
     return [record["cardinality"] for record in result][0]
 
 def get_cardinality_label(resource_label):
