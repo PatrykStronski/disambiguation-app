@@ -40,7 +40,7 @@ class InitialGraph:
         for rel in relation_picker_vector:
             if rand < rel["max_probability"]:
                 return rel["relation"]
-        return None
+        return relations[0]
 
     def increment_visits(self, picked_relation):
         for count in self.node_visit_counts:
