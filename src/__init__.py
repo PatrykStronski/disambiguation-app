@@ -1,5 +1,6 @@
 import sys
 sys.path.append('./disambiguation/')
-import prepare_initial_graph
+from GraphDatabaseCreatorClass import GraphDatabaseCreator
 
-prepare_initial_graph.prepare_graph(3, 0.2, 0.2)
+gdc = GraphDatabaseCreator(50, 2, 0.3)
+gdc.create_graph()

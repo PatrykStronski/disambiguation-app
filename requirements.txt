@@ -1,3 +1,4 @@
 flask
 rdflib
 neo4j
+pytest
