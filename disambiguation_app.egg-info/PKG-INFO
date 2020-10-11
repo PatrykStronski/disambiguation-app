@@ -1,0 +1,14 @@
+Metadata-Version: 1.2
+Name: disambiguation-app
+Version: 0.0.1
+Summary: disambiguation
+Home-page: https://github.com/PatrykStronski/disambiguation-app
+Author: PS
+Author-email: p.stronski13@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Linux
+Requires-Python: >=3.6

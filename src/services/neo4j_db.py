@@ -12,18 +12,16 @@ class Neo4jDb:
         self.session = self.driver.session(database = self.database_name)
 
     def get_relation(self, node1, node2):
-        result = self.session.run("MATCH (n {uri: '" + node1.get("uri") + "'}) -[r]- (b {uri: '" + node2.get("uri") + "'}) RETURN r AS relation")
+        result = self.session.run("MATCH (n {uri: '" + node1 + "'}) -[r]- (b {uri: '" + node2 + "'}) RETURN r AS relation")
         relation = [record["relation"] for record in result]
-        if (len(relation) == 0):
-            return None
         return relation
 
     def get_triangle_weight(self, node, node2):
-        result = self.session.run("MATCH (start:Resource {uri: '" + node.get("uri") + "'})-[rel1]-(second: Resource {uri: '" + node2.get("uri") + "'}), connections_second=(second)-[rel2]-(third: Resource), triangle_connections=(third)-[rel3]-(start) RETURN COUNT(triangle_connections) AS cardinality")
+        result = self.session.run("MATCH (start:Resource {uri: '" + node + "'})-[rel1]-(second: Resource {uri: '" + node2 + "'}), connections_second=(second)-[rel2]-(third: Resource), triangle_connections=(third)-[rel3]-(start) RETURN COUNT(triangle_connections) AS cardinality")
         return [record["cardinality"] for record in result][0] + 1
 
     def get_related_nodes(self, node):
-        result = self.session.run("MATCH (n {uri: '" + node.get("uri") + "'}) -- (b) RETURN b AS resource")
+        result = self.session.run("MATCH (n {uri: '" + node + "'}) -- (b) RETURN b AS resource")
         return [record["resource"] for record in result]
 
     def get_number_of_nodes(self):
