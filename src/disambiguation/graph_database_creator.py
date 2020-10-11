@@ -1,7 +1,5 @@
-from InitialGraphClass import InitialGraph
-import sys
-sys.path.append("./services/")
-from Neo4jDbClass import Neo4jDb
+from disambiguation.initial_graph import InitialGraph
+from services.neo4j_db import Neo4jDb
 
 class GraphDatabaseCreator:
     neo4j_mgr = None
