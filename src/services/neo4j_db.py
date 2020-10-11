@@ -21,8 +21,8 @@ class Neo4jDb:
         return [record["cardinality"] for record in result][0] + 1
 
     def get_related_nodes(self, node):
-        result = self.session.run("MATCH (n {uri: '" + node + "'}) -- (b) RETURN b AS resource")
-        return [record["resource"] for record in result]
+        result = self.session.run("MATCH (n {uri: '" + node + "'}) -[r]- (b) RETURN b AS resource, r AS relation")
+        return [(record["resource"], record["relation"]) for record in result]
 
     def get_number_of_nodes(self):
         result = self.session.run("MATCH (n:Resource) RETURN COUNT(n) AS qty")
