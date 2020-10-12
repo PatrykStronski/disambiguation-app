@@ -21,8 +21,8 @@ class Neo4jDb:
         return [record["cardinality"] for record in result][0] + 1
 
     def get_related_nodes(self, node):
-        result = self.session.run("MATCH (n:Resource {uri: '" + node + "'}) -[r]- (b:Resource) RETURN b AS resource, r AS relation")
-        return [(record["resource"], record["relation"]) for record in result]
+        result = self.session.run("MATCH (n:Resource {uri: '" + node + "'}) -[r]- (b:Resource), (b) -[r2]- (n) RETURN b AS resource, r AS relation, r2 AS relation2")
+        return [(record["resource"], (record["relation"], record["relation2"])) for record in result]
 
     def get_number_of_nodes(self):
         result = self.session.run("MATCH (n:Resource) RETURN COUNT(n) AS qty")
@@ -37,6 +37,12 @@ class Neo4jDb:
 
     def get_label_single_node(self, node):
         return node["rdfs__label"]
+
+    def purge(self):
+        self.session.run("MATCH (n) DELETE n")
+
+    def create_relation(self, node1_uri, node2_uri, relations):
+        print(node1_uri + node2_uri + relations[0] + relations[1])
 
     def __del__(self):
         self.session.close()

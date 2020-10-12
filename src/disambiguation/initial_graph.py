@@ -10,14 +10,16 @@ class InitialGraph:
     threshold_visits = 1
     restart_probability = 0.0
     neo4j_mgr = None
+    neo4j_new = None
 
-    def __init__(self, initial_node_uri, depth, threshold_visits, restart_probability, neo4j_mgr):
+    def __init__(self, initial_node_uri, depth, threshold_visits, restart_probability, neo4j_mgr, neo4j_new):
         self.initial_node_uri = initial_node_uri
         self.current_node_uri = initial_node_uri
         self.max_depth = depth
         self.threshold_visits = threshold_visits
         self.restart_probability = restart_probability
         self.neo4j_mgr = neo4j_mgr
+        self.neo4j_new = neo4j_new
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node1", "node2", "relation"])
 
     def should_restart(self):
@@ -48,7 +50,7 @@ class InitialGraph:
         for (node, relation) in related_nodes:
             weight = self.neo4j_mgr.get_triangle_weight(self.current_node_uri, node.get("uri"))
             weight_sum += weight
-            relation_weights.append({ "weight": weight, "relation": relation.type, "node1": self.current_node_uri, "node2": node.get("uri") })
+            relation_weights.append({ "weight": weight, "relation": (relation[0].type, relation[1].type), "node1": self.current_node_uri, "node2": node.get("uri") })
         relations = pd.DataFrame(relation_weights)
         relations["probability"] = relations["weight"] / weight_sum
         picked_relation = self.choose_relation(relations)
@@ -59,4 +61,8 @@ class InitialGraph:
 
     def get_graph(self):
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-        #print(strong_relations)
+        print(strong_relations)
+
+    def insert_graph(self):
+        strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
+        #strong_relations.apply(lambda row: self.neo4j_new.create_relation(row["node1"], row["node2"], row["relation"]))
