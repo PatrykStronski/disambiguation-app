@@ -17,11 +17,11 @@ class Neo4jDb:
         return relation
 
     def get_triangle_weight(self, node, node2):
-        result = self.session.run("MATCH (start:Resource {uri: '" + node + "'})-[rel1]-(second: Resource {uri: '" + node2 + "'}), connections_second=(second)-[rel2]-(third: Resource), triangle_connections=(third)-[rel3]-(start) RETURN COUNT(triangle_connections) AS cardinality")
+        result = self.session.run("MATCH (start:Resource {uri: '" + node + "'})-[rel1]-(second: Resource {uri: '" + node2 + "'}), connections_second=(second)-[rel2]-(third: Resource), triangle_connections=(third: Resource)-[rel3]-(start) RETURN COUNT(triangle_connections) AS cardinality")
         return [record["cardinality"] for record in result][0] + 1
 
     def get_related_nodes(self, node):
-        result = self.session.run("MATCH (n {uri: '" + node + "'}) -[r]- (b) RETURN b AS resource, r AS relation")
+        result = self.session.run("MATCH (n:Resource {uri: '" + node + "'}) -[r]- (b:Resource) RETURN b AS resource, r AS relation")
         return [(record["resource"], record["relation"]) for record in result]
 
     def get_number_of_nodes(self):

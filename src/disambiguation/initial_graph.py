@@ -44,7 +44,7 @@ class InitialGraph:
             self.current_node_uri = self.initial_node_uri
         related_nodes = self.neo4j_mgr.get_related_nodes(self.current_node_uri)
         relation_weights = []
-        weight_sum = 0 
+        weight_sum = 0
         for (node, relation) in related_nodes:
             weight = self.neo4j_mgr.get_triangle_weight(self.current_node_uri, node.get("uri"))
             weight_sum += weight
@@ -55,7 +55,6 @@ class InitialGraph:
         self.increment_visits(picked_relation)
         self.current_node_uri = picked_relation["node2"]
         self.depth_level += 1
-        print(self.depth_level)
         self.random_walk_with_restart()
 
     def get_graph(self):
