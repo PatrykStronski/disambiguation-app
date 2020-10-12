@@ -59,4 +59,4 @@ class InitialGraph:
 
     def get_graph(self):
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-        print(strong_relations)
+        #print(strong_relations)
