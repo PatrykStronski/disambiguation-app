@@ -44,14 +44,8 @@ class InitialGraph:
             return
         if self.should_restart():
             self.current_node_uri = self.initial_node_uri
-        related_nodes = self.neo4j_mgr.get_related_nodes(self.current_node_uri)
-        relation_weights = []
-        weight_sum = 0
-        for (node, relation) in related_nodes:
-            weight = self.neo4j_mgr.get_triangle_weight(self.current_node_uri, node.get("uri"))
-            weight_sum += weight
-            relation_weights.append({ "weight": weight, "relation": (relation[0].type, relation[1].type), "node1": self.current_node_uri, "node2": node.get("uri") })
-        relations = pd.DataFrame(relation_weights)
+        relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri))
+        weight_sum = relations["weight"].sum()
         relations["probability"] = relations["weight"] / weight_sum
         picked_relation = self.choose_relation(relations)
         self.increment_visits(picked_relation)
@@ -65,4 +59,4 @@ class InitialGraph:
 
     def insert_graph(self):
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-        #strong_relations.apply(lambda row: self.neo4j_new.create_relation(row["node1"], row["node2"], row["relation"]))
+        [self.neo4j_new.create_relation(node1, node2, relations) for node1, node2, relations in zip(strong_relations["node1"], strong_relations["node2"], strong_relations["relation"])]

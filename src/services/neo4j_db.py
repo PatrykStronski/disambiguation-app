@@ -24,6 +24,15 @@ class Neo4jDb:
         result = self.session.run("MATCH (n:Resource {uri: '" + node + "'}) -[r]- (b:Resource), (b) -[r2]- (n) RETURN b AS resource, r AS relation, r2 AS relation2")
         return [(record["resource"], (record["relation"], record["relation2"])) for record in result]
 
+    def get_related_nodes_weighted(self, node):
+        result = self.session.run("MATCH (n:Resource {uri: '" + node + "'}) -[r]- (b:Resource), (b) -[r2]- (n) OPTIONAL MATCH (b) -- (c: Resource), (c) -[r_triangle]- (n) RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight")
+        return [{
+            "node1": node,
+            "node2": record["node2"],
+            "relation": (record["relation"].type, record["relation2"].type),
+            "weight": record["weight"] + 1
+        } for record in result]
+
     def get_number_of_nodes(self):
         result = self.session.run("MATCH (n:Resource) RETURN COUNT(n) AS qty")
         return [record["qty"] for record in result][0]
@@ -42,7 +51,7 @@ class Neo4jDb:
         self.session.run("MATCH (n) DELETE n")
 
     def create_relation(self, node1_uri, node2_uri, relations):
-        print(node1_uri + node2_uri + relations[0] + relations[1])
+        self.session.run("MERGE (start: Resource {uri: '" + node1_uri + "'}) MERGE (end:Resource {uri: '" + node2_uri + "'}) MERGE  (start)-[:" + relations[0] + "]->(end) MERGE  (end)-[:" + relations[1] + "]->(start)")
 
     def __del__(self):
         self.session.close()

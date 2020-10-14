@@ -16,7 +16,7 @@ class GraphDatabaseCreator:
 
     def create_graph(self):
         print("Purge use database")
-        self.neo4j_new.purge()
+        ##self.neo4j_new.purge()
         print("Use database purged!")
         node_count = self.neo4j_mgr.get_number_of_nodes()
         for node_index in range(0, node_count):
@@ -24,5 +24,5 @@ class GraphDatabaseCreator:
             init_graph = InitialGraph(node, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new)
             init_graph.random_walk_with_restart()
             print("Graph creted for node " + str(node_index))
-            init_graph.get_graph()
+            init_graph.insert_graph()
 
