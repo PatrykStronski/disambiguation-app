@@ -23,6 +23,6 @@ class GraphDatabaseCreator:
             node = self.neo4j_mgr.get_node_by_index(node_index).get("uri")
             init_graph = InitialGraph(node, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new)
             init_graph.random_walk_with_restart()
-            print("Graph creted for node " + str(node_index))
+            #print("Graph creted for node " + str(node_index))
             init_graph.insert_graph()
 

@@ -45,6 +45,14 @@ class InitialGraph:
         if self.should_restart():
             self.current_node_uri = self.initial_node_uri
         relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri))
+        if relations.empty:
+            if self.current_node_uri == self.initial_node_uri:
+                return
+            else:
+                self.depth_level += 1
+                self.current_node_uri = self.initial_node_uri
+                self.random_walk_with_restart()
+                return
         weight_sum = relations["weight"].sum()
         relations["probability"] = relations["weight"] / weight_sum
         picked_relation = self.choose_relation(relations)
