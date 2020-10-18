@@ -8,7 +8,7 @@ class GraphDatabaseCreator:
     threshold_visits = 0
     restart_probability = 0.0
     def __init__(self, depth, threshold_visits, restart_probability):
-        self.neo4j_mgr = Neo4jDb("naivefull2")
+        self.neo4j_mgr = Neo4jDb("naivefull")
         self.neo4j_new = Neo4jDb("databaseuse")
         self.max_depth = depth
         self.threshold_visits = threshold_visits
