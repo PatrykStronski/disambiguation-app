@@ -4,6 +4,7 @@ import pandas as pd
 class InitialGraph:
     initial_node_uri = ""
     current_node_uri = ""
+    initial_node_properties = {}
     node_visit_counts = pd.DataFrame()
     max_depth = 0
     depth_level = 0
@@ -12,9 +13,10 @@ class InitialGraph:
     neo4j_mgr = None
     neo4j_new = None
 
-    def __init__(self, initial_node_uri, depth, threshold_visits, restart_probability, neo4j_mgr, neo4j_new):
+    def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_mgr, neo4j_new):
         self.initial_node_uri = initial_node_uri
         self.current_node_uri = initial_node_uri
+        self.initial_node_properties = initial_node_properties
         self.max_depth = depth
         self.threshold_visits = threshold_visits
         self.restart_probability = restart_probability
@@ -66,5 +68,6 @@ class InitialGraph:
         print(strong_relations)
 
     def insert_graph(self):
+        self.neo4j_new.create_node(self.initial_node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
         [self.neo4j_new.create_relation(node1, node2, relations) for node1, node2, relations in zip(strong_relations["node1"], strong_relations["node2"], strong_relations["relation"])]

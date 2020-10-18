@@ -1,4 +1,5 @@
 from neo4j import GraphDatabase
+import json
 
 class Neo4jDb:
     URI = "neo4j://localhost:7687/"
@@ -38,8 +39,8 @@ class Neo4jDb:
         return [record["qty"] for record in result][0]
 
     def get_node_by_index(self, ind):
-        result = self.session.run("MATCH (n:Resource) RETURN n AS resource SKIP " + str(ind) + " LIMIT 1")
-        return [record["resource"] for record in result][0]
+        result = self.session.run("MATCH (n:Resource) RETURN n.uri AS resource, properties(n) AS properties SKIP " + str(ind) + " LIMIT 1")
+        return [(record["resource"], record["properties"] ) for record in result][0]
 
     def get_uri_single_node(self, node):
         return node["uri"]
@@ -47,7 +48,22 @@ class Neo4jDb:
     def get_label_single_node(self, node):
         return node["rdfs__label"]
 
+    def compose_props(self, properties):
+        props = []
+        for prop in properties.keys():
+            if type(properties[prop]) == str:
+                props.append(prop + ": '" + str(properties[prop]) + "'")
+            else:
+                props.append(prop + ": " + str(properties[prop]))
+        separator = ","
+        return "{" + separator.join(props) + "}"
+
+    def create_node(self, properties):
+        props = self.compose_props(properties)
+        self.session.run("MERGE (n:Resource " + props + ")")
+
     def purge(self):
+        self.session.run("MATCH (n)-[r]-(b) DELETE r")
         self.session.run("MATCH (n) DELETE n")
 
     def create_relation(self, node1_uri, node2_uri, relations):
