@@ -52,22 +52,23 @@ class Neo4jDb:
         props = []
         for prop in properties.keys():
             if type(properties[prop]) == str:
-                props.append(prop + ": '" + str(properties[prop]) + "'")
+                props.append("n."+prop + "= '" + str(properties[prop]) + "'")
             else:
-                props.append(prop + ": " + str(properties[prop]))
-        separator = ","
-        return "{" + separator.join(props) + "}"
+                props.append("n."+prop + "= " + str(properties[prop]))
+        separator = ", "
+        return separator.join(props)
 
     def create_node(self, properties):
         props = self.compose_props(properties)
-        self.session.run("MERGE (n:Resource " + props + ")")
+        print(props)
+        self.session.run("MERGE (n:Resource {uri: '" + properties["uri"] + "'}) SET " + props)
 
     def purge(self):
         self.session.run("MATCH (n)-[r]-(b) DELETE r")
         self.session.run("MATCH (n) DELETE n")
 
     def create_relation(self, node1_uri, node2_uri, relations):
-        self.session.run("MERGE (start: Resource {uri: '" + node1_uri + "'}) MERGE (end:Resource {uri: '" + node2_uri + "'}) MERGE  (start)-[:" + relations[0] + "]->(end) MERGE  (end)-[:" + relations[1] + "]->(start)")
+        self.session.run("MATCH (start: Resource {uri: '" + node1_uri + "'}) MERGE (end:Resource {uri: '" + node2_uri + "'}) MERGE  (start)-[:" + relations[0] + "]->(end) MERGE  (end)-[:" + relations[1] + "]->(start)")
 
     def __del__(self):
         self.session.close()

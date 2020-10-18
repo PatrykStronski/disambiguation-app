@@ -12,3 +12,9 @@ class Disambiguation:
         lemmatizer = WordNetLemmatizer()
         word_lemma = lemmatizer.lemmatize(word)
         results = self.neo4j_mgr.find_word(word_lemma)
+
+    def disambiguate_text(self):
+        return [
+            { "word": "I", "meanings": [{"desc": "A person that is speaking sayingabout thyself", "link": "https://google.com"}]},
+            { "word": "like", "meanings": [{ "desc": "Positive attitude towards sth", "link": "https://foo.bak.com"}]}
+        ]

@@ -1,4 +1,4 @@
-from src.disambiguation.initial_graph import InitialGraph
+from disambiguation.initial_graph import InitialGraph
 
 def test_should_restart():
     init_graph = InitialGraph(None, 0, 0, 0, None)

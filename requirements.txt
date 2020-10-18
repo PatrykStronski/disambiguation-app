@@ -1,3 +1,4 @@
+nltk
 flask
 rdflib
 neo4j

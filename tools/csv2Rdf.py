@@ -1,6 +1,6 @@
 import sys
 import os
-import urllib.parse
+import re
 
 RELATIONS = {
     "sameAs": "<http://www.w3.org/2002/07/owl#sameAs>",
@@ -17,7 +17,7 @@ def parse_relation(relation):
         if rel:
             return rel
         else:
-            return '\"' + urllib.parse.quote(relation) + '\"'
+            return '\"' + re.escape(relation) + '\"'
 
 file_name = sys.argv[1]
 out = sys.argv[2]
@@ -33,7 +33,7 @@ with open(file_name, "r", encoding="utf-8") as content:
         if triplet_rdf[2].startswith("http://") or triplet_rdf[2].startswith("https://"):
             write_line += "<" + triplet_rdf[2].strip() + "> .\n"
         else:
-            write_line += "\"" + urllib.parse.quote(triplet_rdf[2]) + "\" .\n"
+            write_line += "\"" + triplet_rdf[2].replace('\n','').replace('"', '').replace('\\', '') + "\" .\n"
         destination.write(write_line)
 
 destination.close()

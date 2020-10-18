@@ -7,6 +7,7 @@ app = Flask(__name__, instance_relative_config=True)
 def disambiguate():
     text = request.args.get('text')
     disambiguate = Disambiguation(text)
+    return disambiguate.disambiguate_text()
 
 def create_app():
     app.run(debug=True)
