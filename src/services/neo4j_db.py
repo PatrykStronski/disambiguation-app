@@ -60,7 +60,6 @@ class Neo4jDb:
 
     def create_node(self, properties):
         props = self.compose_props(properties)
-        print(props)
         self.session.run("MERGE (n:Resource {uri: '" + properties["uri"] + "'}) SET " + props)
 
     def purge(self):
