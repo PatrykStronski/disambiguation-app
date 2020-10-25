@@ -18,6 +18,38 @@ def test_choose_relation():
     picked_relation = init_graph.choose_relation(relations)
     assert type(picked_relation) is dict
 
+def test_choose_relation_randomness():
+    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None)
+    relations = pd.DataFrame([
+        { "relation": "rel1", "node2": "n1", "weight": 1 },
+        { "relation": "rel2", "node2": "n1", "weight": 1 },
+        { "relation": "rel3", "node2": "n1", "weight": 1 },
+        { "relation": "rel4", "node2": "n1", "weight": 1 },
+        { "relation": "rel5", "node2": "n1", "weight": 1 },
+    ])
+    picked1 = init_graph.choose_relation(relations)
+    picked2 = init_graph.choose_relation(relations)
+    if picked1["relation"] == picked2["relation"]:
+        picked2 = init_graph.choose_relation(relations)
+    if picked1["relation"] == picked2["relation"]:
+        picked2 = init_graph.choose_relation(relations)
+    assert picked1["relation"] != picked2["relation"]
+
+def test_choose_relation_biasness():
+    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None)
+    relations = pd.DataFrame([
+        { "relation": "rel1", "node2": "n1", "weight": 1 },
+        { "relation": "rel2", "node2": "n1", "weight": 200 },
+        { "relation": "rel3", "node2": "n1", "weight": 1 },
+        { "relation": "rel4", "node2": "n1", "weight": 1 },
+        { "relation": "rel5", "node2": "n1", "weight": 1 },
+        { "relation": "rel6", "node2": "n1", "weight": 1 },
+        { "relation": "rel7", "node2": "n1", "weight": 1 },
+    ])
+    picked1 = init_graph.choose_relation(relations)
+    picked2 = init_graph.choose_relation(relations)
+    assert picked1["relation"] == "rel2" or picked2["relation"] == "rel2"
+
 def test_increment_visits_empty():
     init_graph = InitialGraph("ns", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None)
     picked_relation = { "relation": "rel3", "node2": "n1", "node1": "ns" }
