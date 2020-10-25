@@ -15,6 +15,6 @@ class Disambiguation:
 
     def disambiguate_text(self):
         return [
-            { "word": "I", "meanings": [{"desc": "A person that is speaking sayingabout thyself", "link": "https://google.com"}]},
-            { "word": "like", "meanings": [{ "desc": "Positive attitude towards sth", "link": "https://foo.bak.com"}]}
+            { "entity": "I", "meanings": [{"desc": "A person that is speaking sayingabout thyself", "link": "https://google.com"}]},
+            { "entity": "like", "meanings": [{ "desc": "Positive attitude towards sth", "link": "https://foo.bak.com"}]}
         ]

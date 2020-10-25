@@ -32,7 +32,7 @@ class InitialGraph:
         self.random_walk_with_restart()
 
     def choose_relation(self, relations):
-        return relations.sample(weights = relations["probability"].values).to_dict(orient = "records")[0]
+        return relations.sample(weights = relations["weight"].values).to_dict(orient = "records")[0]
 
     def increment_visits(self, picked_relation):
         existing_entry = self.node_visit_counts.loc[(self.node_visit_counts["node1"] == picked_relation["node1"]) & (self.node_visit_counts["node2"] == picked_relation["node2"])]
@@ -55,8 +55,6 @@ class InitialGraph:
                 self.current_node_uri = self.initial_node_uri
                 self.random_walk_with_restart()
                 return
-        weight_sum = relations["weight"].sum()
-        relations["probability"] = relations["weight"] / weight_sum
         picked_relation = self.choose_relation(relations)
         self.increment_visits(picked_relation)
         self.current_node_uri = picked_relation["node2"]

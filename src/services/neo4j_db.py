@@ -54,7 +54,7 @@ class Neo4jDb:
             if type(properties[prop]) == str:
                 props.append("n."+prop + "= '" + str(properties[prop]) + "'")
             else:
-                props.append("n."+prop + "= " + str(properties[prop]))
+                props.append("n."+prop + "= " + str(properties[prop]).replace("\\x", "?"))
         separator = ", "
         return separator.join(props)
 
