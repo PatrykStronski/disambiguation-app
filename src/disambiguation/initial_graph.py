@@ -12,6 +12,7 @@ class InitialGraph:
     restart_probability = 0.0
     neo4j_mgr = None
     neo4j_new = None
+    language = "all"
 
     def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_mgr, neo4j_new):
         self.initial_node_uri = initial_node_uri
@@ -22,7 +23,24 @@ class InitialGraph:
         self.restart_probability = restart_probability
         self.neo4j_mgr = neo4j_mgr
         self.neo4j_new = neo4j_new
+        self.language = self.extract_language()
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node1", "node2", "relation"])
+
+    def extract_language(self):
+        preflabel = self.initial_node_properties.get("skos__prefLabel")
+        if type(preflabel) is list:
+            ispl = any("@pl" in label for label in preflabel)
+            isen = any("@en" in label for label in preflabel)
+            if ispl == True and isen == False:
+                return "@pl"
+            elif ispl == False and isen == True:
+                return "@en"
+        elif type(preflabel) is str:
+            if "@pl" in preflabel:
+                return "@pl"
+            elif "@en" in preflabel:
+                return "@en"
+        return "all"
 
     def should_restart(self):
         rand = random.random()
@@ -46,7 +64,7 @@ class InitialGraph:
             return
         if self.should_restart():
             self.current_node_uri = self.initial_node_uri
-        relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri))
+        relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri, self.language))
         if relations.empty:
             if self.current_node_uri == self.initial_node_uri:
                 return

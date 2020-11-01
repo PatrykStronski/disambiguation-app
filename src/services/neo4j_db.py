@@ -25,8 +25,13 @@ class Neo4jDb:
         result = self.session.run("MATCH (n:Resource {uri: '" + node + "'}) -[r]- (b:Resource), (b) -[r2]- (n) RETURN b AS resource, r AS relation, r2 AS relation2")
         return [(record["resource"], (record["relation"], record["relation2"])) for record in result]
 
-    def get_related_nodes_weighted(self, node):
-        result = self.session.run("MATCH (n:Resource {uri: '" + node + "'}) -[r]- (b:Resource), (b) -[r2]- (n) OPTIONAL MATCH (b) -- (c: Resource), (c) -[r_triangle]- (n) RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight")
+    def get_related_nodes_weighted(self, node, language):
+        query = "MATCH (n:Resource {uri: '" + node + "'}) -[r]- (b:Resource), (b) -[r2]- (n) OPTIONAL MATCH (b) -- (c: Resource), (c) -[r_triangle]- (n) RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight"
+        if language == "@en":
+            query = "MATCH (n:Resource {uri: '" + node + "'})  -[r]- (b:Resource), (b) -[r2]- (n) OPTIONAL MATCH (b) -- (c: Resource), (c) -[r_triangle]- (n) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS '@en') AND ANY (x IN c.skos__prefLabel WHERE x CONTAINS '@en') RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight"
+        elif language == "@pl":
+            query = "MATCH (n:Resource {uri: '" + node + "'})  -[r]- (b:Resource), (b) -[r2]- (n) OPTIONAL MATCH (b) -- (c: Resource), (c) -[r_triangle]- (n) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS '@pl') AND ANY (x1 IN c.skos__prefLabel WHERE x1 CONTAINS '@pl') RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight"
+        result = self.session.run(query)
         return [{
             "node1": node,
             "node2": record["node2"],

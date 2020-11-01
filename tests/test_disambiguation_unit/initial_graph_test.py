@@ -1,6 +1,24 @@
 import pandas as pd
 from disambiguation.initial_graph import InitialGraph
 
+def test_extract_language_en():
+    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": ["Label@en"]}, 0, 0, 0, None, None)
+    assert init_graph.extract_language() == "@en"
+    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": "Label@en"}, 0, 0, 0, None, None)
+    assert init_graph.extract_language() == "@en"
+
+def test_extract_language_pl():
+    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": ["Label@pl"]}, 0, 0, 0, None, None)
+    assert init_graph.extract_language() == "@pl"
+    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": "Label@pl"}, 0, 0, 0, None, None)
+    assert init_graph.extract_language() == "@pl"
+
+def test_extract_language_all():
+    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": ["Label@pl", "Label@en"]}, 0, 0, 0, None, None)
+    assert init_graph.extract_language() == "all"
+    init_graph = InitialGraph("http://dummyurl", { }, 0, 0, 0, None, None)
+    assert init_graph.extract_language() == "all"
+
 def test_should_restart():
     init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": ["Label"]}, 0, 0, 0, None, None)
     ret = init_graph.should_restart()
