@@ -14,17 +14,17 @@ class GraphDatabaseCreator:
         self.threshold_visits = threshold_visits
         self.restart_probability = restart_probability
 
-    def create_graph(self):
-        print("Purge use database")
-        self.neo4j_new.purge()
-        print("Use database purged!")
+    def create_graph(self, start, end):
+        #print("Purge use database")
+        #self.neo4j_new.purge()
+        #print("Use database purged!")
         #node_count = self.neo4j_mgr.get_number_of_nodes()
-        node_count = 15
-        for node_index in range(0, node_count):
+        for node_index in range(start, end):
             (node_uri, node_properties) = self.neo4j_mgr.get_node_by_index(node_index);
             init_graph = InitialGraph(node_uri, node_properties, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new)
             init_graph.random_walk_with_restart()
             #init_graph.get_graph()
-            #print("Graph creted for node " + str(node_index))
+            if node_index % 100 == 0:
+                print("Graph creted for node " + str(node_index))
             init_graph.insert_graph()
 
