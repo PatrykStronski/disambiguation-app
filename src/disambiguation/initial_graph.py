@@ -44,6 +44,8 @@ class InitialGraph:
 
     def should_restart(self):
         rand = random.random()
+        if "http://www.w3.org/" in self.current_node_uri:
+            return True
         return rand <= self.restart_probability
 
     def create_graph(self):

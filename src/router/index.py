@@ -7,8 +7,7 @@ Disamb = Disambiguation()
 @app.route('/disambiguate', methods=['GET'])
 def disambiguate():
     text = request.args.get('text')
-    #lang = request.args.get('lang')
-    lang = "english"
+    lang = request.args.get('lang')
     return Disamb.disambiguate_text(text, lang)
 
 def create_app():

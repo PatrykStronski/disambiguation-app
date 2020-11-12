@@ -17,8 +17,8 @@ class Neo4jDisambiguation:
         return relation
 
     def find_word(self, word):
-        result_pref = self.session.run("MATCH (n:Resource) WHERE '" + word + "' IN n.skos__prefLabel RETURN n.uri AS uri")
-        result_alt = self.session.run("MATCH (n:Resource) WHERE '" + word + "' IN n.skos__altLabel RETURN n.uri AS uri")
-        res_pref = [{ "uri": record["uri"], "source": "prefLabel" } for record in result_pref]
-        res_alt = [{ "uri": record["uri"], "source": "altLabel" } for record in result_alt]
-        return { word: res_alt + res_pref}
+        result_pref = self.session.run("MATCH (n:Resource) -[r]- (b:Resource) WHERE '" + word + "' IN n.skos__prefLabel RETURN n.uri AS uri, COUNT(r) as deg, n.inSignatures AS sign")
+        result_alt = self.session.run("MATCH (n:Resource) -[r]- (b:Resource) WHERE '" + word + "' IN n.skos__altLabel RETURN n.uri AS uri, COUNT(r) as deg, n.inSignatures AS sign")
+        res_pref = [{ "uri": record["uri"], "source": "prefLabel", "deg": record["deg"], "sign": record["sign"] } for record in result_pref]
+        res_alt = [{ "uri": record["uri"], "source": "altLabel", "deg": record["deg"], "sign": record["sign"] } for record in result_alt]
+        return res_alt + res_pref
