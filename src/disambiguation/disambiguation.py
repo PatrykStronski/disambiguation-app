@@ -11,7 +11,7 @@ LANGUAGE_ALIAS = {
 
 DISAMBIGUATION_THRESHOLD = 0.0
 TOP = 5
-USE_FALLBACK = True
+USE_FALLBACK = False
 
 class Disambiguation:
     neo4j_mgr = None
