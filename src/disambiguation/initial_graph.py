@@ -14,7 +14,7 @@ class InitialGraph:
     neo4j_mgr = None
     neo4j_new = None
     language = "all"
-    #depth_distribution = []
+    depth_distribution = []
 
     def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_mgr, neo4j_new):
         self.initial_node_uri = initial_node_uri
@@ -25,7 +25,7 @@ class InitialGraph:
         self.restart_probability = restart_probability
         self.neo4j_mgr = neo4j_mgr
         self.neo4j_new = neo4j_new
-        #self.depth_distribution = [0] * 20
+        self.depth_distribution = [0] * 20
         self.language = self.extract_language()
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node1", "node2", "relation"])
 
@@ -43,7 +43,7 @@ class InitialGraph:
                 return "@pl"
             elif "@en" in preflabel:
                 return "@en"
-        return "@pl"
+        return "all"
 
     def should_restart(self):
         probability = 1-((1-self.restart_probability)**self.depth)
@@ -67,25 +67,22 @@ class InitialGraph:
     def random_walk_with_restart(self):
         if self.iterations_level >= self.max_iterations:
             strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-            return
-            #return (strong_relations.shape[0], self.depth_distribution)
+            return (strong_relations.shape[0], self.depth_distribution)
         if self.should_restart():
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
-        #self.depth_distribution[self.depth] +=1
+        self.depth_distribution[self.depth] +=1
         relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri, self.language))
         if relations.empty:
             if self.current_node_uri == self.initial_node_uri:
                 strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-                return
-                #return (strong_relations.shape[0], self.depth_distribution)
+                return (strong_relations.shape[0], self.depth_distribution)
             else:
                 self.iterations_level += 1
                 self.current_node_uri = self.initial_node_uri
                 self.random_walk_with_restart()
                 strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-                return
-                #return (strong_relations.shape[0], self.depth_distribution)
+                return (strong_relations.shape[0], self.depth_distribution)
         initial_node_in_vicinity = self.initial_node_uri in relations.node2
         self.depth += 1
         if initial_node_in_vicinity:

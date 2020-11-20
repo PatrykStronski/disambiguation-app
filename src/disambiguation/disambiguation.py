@@ -9,8 +9,9 @@ LANGUAGE_ALIAS = {
     "english": "@en"
 }
 
-DISAMBIGUATION_THRESHOLD = 0.0
+DISAMBIGUATION_THRESHOLD = 0.1
 TOP = 5
+HIDE_SIGNS = True
 USE_FALLBACK = False
 
 class Disambiguation:
@@ -27,6 +28,8 @@ class Disambiguation:
     def filter_candidates(self, tokens):
         for index, token in tokens.iterrows():
             candidates = sorted(token[2], key=lambda cand: cand["score"])[:TOP]
+            if HIDE_SIGNS:
+                candidates = [{"deg": c["deg"], "score": c["score"], "uri": c["uri"], "labels": c["labels"]} for c in candidates]
             token[2] = candidates
             #filter(lambda cand: cand["score"] > DISAMBIGUATION_THRESHOLD, candidates)
 
@@ -61,17 +64,18 @@ class Disambiguation:
         for word in tagged:
             print(word)
             if word[1].startswith("V"):
-                lemmatized.append(self.lemmatizer.lemmatize(word[0].lower() + LANGUAGE_ALIAS[lang], "v"))
+                lemmatized.append(self.lemmatizer.lemmatize(word[0].lower(), "v"))
             elif word[1].startswith("N"):
-                lemmatized.append(self.lemmatizer.lemmatize(word[0].lower() + LANGUAGE_ALIAS[lang]))
+                lemmatized.append(self.lemmatizer.lemmatize(word[0].lower()))
             else:
-                lemmatized.append(word[0].lower() + LANGUAGE_ALIAS[lang])
+                lemmatized.append(word[0].lower())
         return lemmatized
 
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
         tokens = pd.DataFrame([{ "word": w } for w in re.split(r'\W+', text)])
+        print(tokens)
         tokens["basic_form"] = self.basify_words(tokens["word"], lang)
-        tokens["candidates"] = [self.neo4j_mgr.find_word(word) for word in tokens["basic_form"]]
+        tokens["candidates"] = [self.neo4j_mgr.find_word_consists(word) for word in tokens["basic_form"]]
         self.calculate_score(tokens)
         self.filter_candidates(tokens)
         return {
