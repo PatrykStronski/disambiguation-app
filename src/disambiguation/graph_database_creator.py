@@ -42,15 +42,15 @@ class GraphDatabaseCreator:
             sum_depth_distribution = self.add_depth_distributions(sum_depth_distribution, ret[1])
             print("In SemSign " + str(ret[0]) + " Nodes")
             sum_entries += ret[0]
-            init_graph.get_graph()
+            #init_graph.get_graph()
             if node_index % 100 == 0:
                 print("Graph creted for node " + str(node_index))
                 if node_index % 2000 == 0:
                     del self.neo4j_mgr
                     del self.neo4j_new
                     time.sleep(0.3)
-                    self.neo4j_mgr = Neo4jDb(self.db_src)
-                    self.neo4j_new = Neo4jDb(self.db_dest)
+                    self.neo4j_mgr = Neo4jDb(self.db_src_uri, self.db_src)
+                    self.neo4j_new = Neo4jDb(self.db_dest_uri, self.db_dest)
             init_graph.insert_graph()
         print("Avg number of nodes: " + str(sum_entries/(end-start)))
         self.present_depth_distribution(sum_depth_distribution, end-start)
