@@ -32,14 +32,14 @@ class Neo4jDb:
             (c) -[r_triangle]- (n) \
             RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         if language == '@en':
-            query = 'MATCH (n:Resource {uri: "' + node + '"})  -[r]- (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@en") AND NOT b.uri STARTS WITH "http://dbpedia.org/resource/Category:"\
+            query = 'MATCH (n:Resource {uri: "' + node + '"})  -[r]- (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@en") \
                 OPTIONAL MATCH (b) -[r2]- (n) \
-                OPTIONAL MATCH (b) -- (c: Resource) WHERE ANY (x IN c.skos__prefLabel WHERE x CONTAINS "@en") AND NOT c.uri STARTS WITH "http://dbpedia.org/resource/Category:" \
+                OPTIONAL MATCH (b) -- (c: Resource) WHERE ANY (x IN c.skos__prefLabel WHERE x CONTAINS "@en")\
                 OPTIONAL MATCH(c) -[r_triangle]- (n)  RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         elif language == '@pl':
-            query = 'MATCH (n:Resource {uri: "' + node + '"})  -[r]- (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@pl") AND NOT b.uri STARTS WITH "http://dbpedia.org/resource/Category:" \
+            query = 'MATCH (n:Resource {uri: "' + node + '"})  -[r]- (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@pl") \
                 OPTIONAL MATCH (b) -[r2]- (n) \
-                OPTIONAL MATCH (b) -- (c: Resource) WHERE ANY (x1 IN c.skos__prefLabel WHERE x1 CONTAINS "@pl") AND NOT c.uri STARTS WITH "http://dbpedia.org/resource/Category:" \
+                OPTIONAL MATCH (b) -- (c: Resource) WHERE ANY (x1 IN c.skos__prefLabel WHERE x1 CONTAINS "@pl") \
                 OPTIONAL MATCH (c) -[r_triangle]- (n)  \
                 RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         result = self.session.run(query)
