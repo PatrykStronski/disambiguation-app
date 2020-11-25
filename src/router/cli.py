@@ -5,10 +5,10 @@ Disamb = Disambiguation()
 
 def initiate_cli():
     while True:
-        lang = input("Insert language: polish or english: ")
-        if lang != "polish" or lang != "english":
+        lang = input("Insert language: polish or english: ").strip()
+        if lang != "polish" and lang != "english":
             print("default language - english")
             lang = "english"
         text = input("Provide text for disambiguation: ")
-        print("Your disambiguation is on the way")
+        print("Your disambiguation is on the way...")
         pprint.pprint(Disamb.disambiguate_text(text, lang))

@@ -1,18 +1,18 @@
 import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from services.neo4j_disambiguation import Neo4jDisambiguation
+from utils.disambiguation import merge_into_dataframe
 import re
-import pandas as pd
 
 LANGUAGE_ALIAS = {
     "polish": "@pl",
     "english": "@en"
 }
 
-DISAMBIGUATION_THRESHOLD = 0.1
+DISAMBIGUATION_THRESHOLD = 0.0
+AMBIGUITY_LEVEL = 5
 TOP = 5
 HIDE_SIGNS = True
-USE_FALLBACK = False
 
 class Disambiguation:
     neo4j_mgr = None
@@ -23,46 +23,63 @@ class Disambiguation:
         nltk.download('punkt')
         nltk.download('averaged_perceptron_tagger')
         nltk.download('pl196x')
-        self.neo4j_mgr = Neo4jDisambiguation('databaseuse')
+        self.neo4j_mgr = Neo4jDisambiguation('neo4j')
 
-    def filter_candidates(self, tokens):
-        for index, token in tokens.iterrows():
-            candidates = sorted(token[2], key=lambda cand: cand["score"])[:TOP]
-            if HIDE_SIGNS:
-                candidates = [{"deg": c["deg"], "score": c["score"], "uri": c["uri"], "labels": c["labels"]} for c in candidates]
-            token[2] = candidates
-            #filter(lambda cand: cand["score"] > DISAMBIGUATION_THRESHOLD, candidates)
+    def get_words(self, text):
+        words = re.split(r'\W+', text)
+        return list(filter(None, words))
 
+    def densest_subgraph(self, candidates):
+        while True:
+            print(candidates)
+            self.calculate_semantic_interconnections(candidates)
+            self.calculate_score(candidates)
+            frequent_token = candidates["basic_form"].mode()
+            cand_set = candidates[candidates.basic_form == frequent_token]
+            print(cand_set)
+            if cand_set.shape[0] <= AMBIGUITY_LEVEL:
+                break
+            minimal_score = cand_set.min(level="score")
+            candidates = candidates.drop(candidates[candidates.score < minimal_score and candidates.basic_form == frequent_token].index)
 
-    def calculate_w(self, v_uri, word, tokens):
-        count_relations = 0
-        words_number = tokens.shape[0]
-        for index, token in tokens.iterrows():
-            if token[1] == word:
-                continue
-            candidates = token[2]
-            for cand in candidates:
-                if cand["sign"] == None:
-                    continue
-                if v_uri in cand["sign"]:
-                    count_relations += 1
-        if USE_FALLBACK and count_relations == 0:
-            count_relations = 0.1
-        return count_relations/words_number
+    def filter_candidates(self, candidates):
+        return candidates.loc[candidates.score >= DISAMBIGUATION_THRESHOLD]
 
-    def calculate_score(self, tokens):
-        for index, token in tokens.iterrows():
-            candidates = token[2]
-            word = token[1]
-            for cand in candidates:
-                cand["score"] = cand["deg"]*self.calculate_w(cand["uri"], word, tokens)
+    def calculate_sum_score(self, cand_set, token_nmb):
+        return (cand_set.loc["deg"] * cand_set.loc["semantic_interconnections"] / (token_nmb - 1)).sum()
 
+    def calculate_score(self, candidates):
+        tokens = candidates["basic_form"].unique()
+        for token in tokens:
+            sum_scores = self.calculate_sum_score(candidates.loc["basic_form" == token], len(tokens))
+            candidates.at["basic_form" == token]["score"] = (candidates.loc["deg"] * candidates.loc["semantic_interconnections"] / (len(tokens) - 1)) / sum_scores
 
-    def basify_words(self, tokens, lang = "english"):
+    def count_interconnections_candidate(self, cand, candidates):
+        uri = cand["uri"]
+        token = cand["basic_form"]
+        boolean_mask = candidates.sign.apply(lambda c: uri in c)
+        semsign_children = candidates[boolean_mask]
+        semsign_children = semsign_children[semsign_children.basic_form != token]
+        cand.at["semantic_interconnections"] += semsign_children.shape[0]
+        semsign_children["semantic_interconnections"] += 1 + semsign_children["semantic_interconnections"]
+        return cand
+
+    def count_interconnections_candidate_second(self, cand, candidates):
+        uri_list = cand.sign
+        include_mask = candidates.uri.isin(uri_list)
+        include = candidates[include_mask]
+        cand["semantic_interconnections"] = cand["semantic_interconnections"] + include.shape[0]
+        return cand
+
+    def calculate_semantic_interconnections(self, candidates):
+        candidates["semantic_interconnections"] = 0
+        candidates = candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
+        return candidates.apply(lambda cand: self.count_interconnections_candidate_second(cand, candidates), axis=1)
+
+    def basify_words(self, tokens):
         tagged = nltk.pos_tag(tokens)
         lemmatized = []
         for word in tagged:
-            print(word)
             if word[1].startswith("V"):
                 lemmatized.append(self.lemmatizer.lemmatize(word[0].lower(), "v"))
             elif word[1].startswith("N"):
@@ -72,12 +89,11 @@ class Disambiguation:
         return lemmatized
 
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
-        tokens = pd.DataFrame([{ "word": w } for w in re.split(r'\W+', text)])
-        print(tokens)
-        tokens["basic_form"] = self.basify_words(tokens["word"], lang)
-        tokens["candidates"] = [self.neo4j_mgr.find_word_consists(word) for word in tokens["basic_form"]]
-        self.calculate_score(tokens)
-        self.filter_candidates(tokens)
+        words = self.get_words(text)
+        tokens = self.basify_words(words)
+        candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_consists(word, LANGUAGE_ALIAS[lang]) for word in tokens])
+        self.densest_subgraph(candidates)
+        candidates = self.filter_candidates(candidates)
         return {
-            "data": tokens.to_dict('records')
+            "data": candidates.to_dict("records")
         }

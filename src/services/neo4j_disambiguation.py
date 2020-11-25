@@ -17,7 +17,7 @@ class Neo4jDisambiguation:
         return relation
 
 
-    def find_word_consists(self, word):
+    def find_word_consists(self, word, lang_tag):
         print(word)
         if len(word) < 3:
             return []
@@ -27,7 +27,7 @@ class Neo4jDisambiguation:
         res_alt = [{ "uri": record["uri"], "source": "altLabel", "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result_alt]
         return res_alt + res_pref
 
-    def find_word(self, word):
+    def find_word(self, word, lang_tag):
         result_pref = self.session.run("MATCH (n:Resource) -[r]- (b:Resource) WHERE '" + word + "' IN n.skos__prefLabel RETURN n.uri AS uri, COUNT(r) as deg, n.inSignatures AS sign")
         result_alt = self.session.run("MATCH (n:Resource) -[r]- (b:Resource) WHERE '" + word + "' IN n.skos__altLabel RETURN n.uri AS uri, COUNT(r) as deg, n.inSignatures AS sign")
         res_pref = [{ "uri": record["uri"], "source": "prefLabel", "deg": record["deg"], "sign": record["sign"] } for record in result_pref]
