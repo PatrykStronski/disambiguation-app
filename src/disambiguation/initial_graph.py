@@ -65,6 +65,7 @@ class InitialGraph:
             self.node_visit_counts.loc[(self.node_visit_counts["node1"] == picked_relation["node1"]) & (self.node_visit_counts["node2"] == picked_relation["node2"]), ["count"]] += 1
 
     def random_walk_with_restart(self):
+        print(self.current_node_uri)
         if self.iterations_level >= self.max_iterations:
             strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
             return (strong_relations.shape[0], self.depth_distribution)

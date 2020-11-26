@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ./src
 number_of_workers=$1
-nodes=8520962
+nodes=346000
 batch=$((nodes/number_of_workers))
 ind=0
 strt=0
