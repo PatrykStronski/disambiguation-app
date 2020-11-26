@@ -26,20 +26,20 @@ class Neo4jDb:
         return [(record['resource'], (record['relation'], record['relation2'])) for record in result]
 
     def get_related_nodes_weighted(self, node, language):
-        query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]- (b:Resource) WHERE b.uri <> "http://www.w3.org/2004/02/skos/core#Concept" \
+        query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]- (b:Resource) \
             OPTIONAL MATCH (b) -[r2]- (n) \
             OPTIONAL MATCH (b) -- (c: Resource), \
-            (c) -[r_triangle]- (n) WHERE c.uri <> "http://www.w3.org/2004/02/skos/core#Concept" \
+            (c) -[r_triangle]- (n) \
             RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         if language == '@en':
-            query = 'MATCH (n:Resource {uri: "' + node + '"})  -[r]- (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@en") AND b.uri <> "http://www.w3.org/2004/02/skos/core#Concept"  \
+            query = 'MATCH (n:Resource {uri: "' + node + '"})  -[r]- (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@en")  \
                 OPTIONAL MATCH (b) -[r2]- (n) \
-                OPTIONAL MATCH (b) -- (c: Resource) WHERE ANY (x IN c.skos__prefLabel WHERE x CONTAINS "@en") AND c.uri <> "http://www.w3.org/2004/02/skos/core#Concept"\
+                OPTIONAL MATCH (b) -- (c: Resource) WHERE ANY (x IN c.skos__prefLabel WHERE x CONTAINS "@en") \
                 OPTIONAL MATCH(c) -[r_triangle]- (n)  RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         elif language == '@pl':
-            query = 'MATCH (n:Resource {uri: "' + node + '"})  -[r]- (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@pl") AND b.uri <> "http://www.w3.org/2004/02/skos/core#Concept"\
+            query = 'MATCH (n:Resource {uri: "' + node + '"})  -[r]- (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@pl") \
                 OPTIONAL MATCH (b) -[r2]- (n) \
-                OPTIONAL MATCH (b) -- (c: Resource) WHERE ANY (x1 IN c.skos__prefLabel WHERE x1 CONTAINS "@pl") AND  c.uri <> "http://www.w3.org/2004/02/skos/core#Concept"\
+                OPTIONAL MATCH (b) -- (c: Resource) WHERE ANY (x1 IN c.skos__prefLabel WHERE x1 CONTAINS "@pl") \
                 OPTIONAL MATCH (c) -[r_triangle]- (n)  \
                 RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         result = self.session.run(query)
@@ -55,7 +55,7 @@ class Neo4jDb:
         return [record['qty'] for record in result][0]
 
     def get_node_by_index(self, ind):
-        result = self.session.run('MATCH (n:Resource) RETURN n.uri AS resource, properties(n) AS properties SKIP ' + str(ind) + ' LIMIT 1')
+        result = self.session.run('MATCH (n:Resource) WHERE NOT n:skos__Concept RETURN n.uri AS resource, properties(n) AS properties SKIP ' + str(ind) + ' LIMIT 1')
         return [(record['resource'], record['properties'] ) for record in result][0]
 
     def get_uri_single_node(self, node):
