@@ -24,5 +24,5 @@ def merge_into_dataframe(words, tokens, candidate_sets):
     candidates = pd.DataFrame(columns=FIELDS)
     for ind in range(0,len(words)):
         to_insert_set = map_candidates(words[ind], tokens[ind], candidate_sets[ind])
-        candidates.append(to_insert_set, ignore_index=True)
+        candidates = candidates.append(to_insert_set, ignore_index=True)
     return candidates
