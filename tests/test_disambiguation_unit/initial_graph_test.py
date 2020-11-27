@@ -2,7 +2,7 @@ import pandas as pd
 from disambiguation.initial_graph import InitialGraph
 
 def test_extract_language_en():
-    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": ["Label@en"]}, 0, 0, 0, None, None)
+    init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": ["Label@en", "Label1@en"]}, 0, 0, 0, None, None)
     assert init_graph.extract_language() == "@en"
     init_graph = InitialGraph("http://dummyurl", { "skos__prefLabel": "Label@en"}, 0, 0, 0, None, None)
     assert init_graph.extract_language() == "@en"
