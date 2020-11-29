@@ -1,6 +1,5 @@
 nltk
 flask
-rdflib
 neo4j
 pytest
 pandas

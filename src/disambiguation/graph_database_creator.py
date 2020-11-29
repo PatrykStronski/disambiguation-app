@@ -6,12 +6,11 @@ import time
 class GraphDatabaseCreator:
     neo4j_mgr = None
     neo4j_new = None
-    db_dest_uri = "neo4j://localhost:17687"
-    db_src_uri = "neo4j://localhost:7687"
+    db_dest_uri = "neo4j://neo_dest:7687"
+    db_src_uri = "neo4j://neo_src:7687"
     db_dest = "neo4j"
     db_src = "neo4j"
     max_depth = 0
-    redis_checker = RedisChecker()
     threshold_visits = 0
     restart_probability = 0.0
     def __init__(self, depth, threshold_visits, restart_probability):
@@ -20,6 +19,7 @@ class GraphDatabaseCreator:
         self.max_depth = depth
         self.threshold_visits = threshold_visits
         self.restart_probability = restart_probability
+        self.redis_checker = RedisChecker()
 
     def add_depth_distributions(self, dist1, dist2):
         for ind in range(0,20):

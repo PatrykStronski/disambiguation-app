@@ -70,28 +70,28 @@ def test_choose_relation_biasness():
 
 def test_increment_visits_empty():
     init_graph = InitialGraph("ns", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None)
-    picked_relation = { "relation": "rel3", "node2": "n1", "node1": "ns" }
+    picked_relation = { "relation": "rel3", "journey_length": 1.0, "node2": "n1", "node1": "ns" }
     assert init_graph.node_visit_counts.shape == (0,4)
     init_graph.increment_visits(picked_relation)
-    assert init_graph.node_visit_counts.shape == (1,4)
-    assert { "count": 1, "relation": "rel3", "node1": "ns", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
+    assert init_graph.node_visit_counts.shape == (1,5)
+    assert { "count": 1, "journey_length": 0.0, "relation": "rel3", "node1": "ns", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
 
 def test_increment_visits_same_entry():
     init_graph = InitialGraph("ns", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None)
-    picked_relation = { "count": 1, "relation": "rel3", "node1": "ns", "node2": "n1" }
+    picked_relation = { "count": 1, "journey_length": 1.0, "relation": "rel3", "node1": "ns", "node2": "n1" }
     init_graph.node_visit_counts = pd.DataFrame([picked_relation])
-    assert init_graph.node_visit_counts.shape == (1,4)
+    assert init_graph.node_visit_counts.shape == (1,5)
     init_graph.increment_visits(picked_relation)
-    assert init_graph.node_visit_counts.shape == (1,4)
-    assert { "count": 2, "relation": "rel3", "node1": "ns", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
+    assert init_graph.node_visit_counts.shape == (1,5)
+    assert { "count": 2, "journey_length": 1.0, "relation": "rel3", "node1": "ns", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
 
 def test_increment_visits_different_entry():
     init_graph = InitialGraph("ns", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None)
-    old_relation = { "count": 1, "relation": "rel4", "node1": "nOld", "node2": "n1" }
-    picked_relation = { "relation": "rel3", "node2": "n1", "node1": "ns" }
+    old_relation = { "count": 1, "journey_length": 1.0, "relation": "rel4", "node1": "nOld", "node2": "n1" }
+    picked_relation = { "relation": "rel3", "journey_length": 1.0, "node2": "n1", "node1": "ns" }
     init_graph.node_visit_counts = pd.DataFrame([old_relation])
-    assert init_graph.node_visit_counts.shape == (1,4)
+    assert init_graph.node_visit_counts.shape == (1,5)
     init_graph.increment_visits(picked_relation)
-    assert init_graph.node_visit_counts.shape == (2,4)
-    assert { "count": 1, "relation": "rel4", "node1": "nOld", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
-    assert { "count": 1, "relation": "rel3", "node1": "ns", "node2": "n1" } == init_graph.node_visit_counts.loc[1].to_dict()
+    assert init_graph.node_visit_counts.shape == (2,5)
+    assert { "count": 1, "journey_length": 1.0, "relation": "rel4", "node1": "nOld", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
+    assert { "count": 1, "journey_length": 0.0, "relation": "rel3", "node1": "ns", "node2": "n1" } == init_graph.node_visit_counts.loc[1].to_dict()

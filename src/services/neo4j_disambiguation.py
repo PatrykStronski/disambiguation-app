@@ -1,7 +1,7 @@
 from neo4j import GraphDatabase
 
 class Neo4jDisambiguation:
-    URI = "neo4j://localhost:7687/"
+    URI = "neo4j://neo_dest:7687/"
     database_name = ""
     session = None
     driver = None

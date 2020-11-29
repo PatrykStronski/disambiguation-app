@@ -8,7 +8,9 @@ class RedisChecker:
         self.redis_instance = redis.Redis(host=self.host, db=self.db)
 
     def insert_processed_id(self, uri):
-        self.redis_instance.set(hash(uri), "DONE")
+        print(self.redis_instance.set(uri, "DONE"))
 
     def get_processed_id(self, uri):
-        return self.redis_instance.get(hash(uri))
+        result = self.redis_instance.get(uri)
+        if result:
+            return result.decode('utf-8')

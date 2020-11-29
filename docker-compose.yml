@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  neo_src:
+    image: neo4j:4.2.0
+    user: ${UID:-1000}:${GID:-1000}
+    volumes:
+      - ../storage/neo_src:/data
+    environment:
+      NEO4J_AUTH: ${NEOSRC_NEO4J_AUTH}
+
+  neo_dest:
+    image: neo4j:4.2.0
+    user: ${UID:-1000}:${GID:-1000}
+    volumes:
+      - ../storage/neo_dest:/data
+    environment:
+      NEO4J_AUTH: ${NEODEST_NEO4J_AUTH}
+
+  redis:
+    image: redis:6.0
+    user: ${UID:-1000}:${GID:-1000}
+    command: 'redis-server --appendonly yes'
+    volumes:
+      - ../storage/redis:/data
+
+  app:
+    build: ./docker/python
+    volumes:
+      - ./:/app
+    environment:
+      - PM2_PROC_NUM
+      - APP_MODE
+
