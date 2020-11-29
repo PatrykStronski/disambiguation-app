@@ -30,20 +30,10 @@ class InitialGraph:
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node1", "node2", "relation"])
 
     def extract_language(self):
-        preflabel = self.initial_node_properties.get("skos__prefLabel")
-        if type(preflabel) is list:
-            ispl = any("@pl" in label for label in preflabel)
-            isen = any("@en" in label for label in preflabel)
-            if ispl == True and isen == False:
-                return "@pl"
-            elif ispl == False and isen == True:
-                return "@en"
-        elif type(preflabel) is str:
-            if "@pl" in preflabel:
-                return "@pl"
-            elif "@en" in preflabel:
-                return "@en"
-        return "all"
+        princeton = self.initial_node_properties.get("princeton")
+        if princeton:
+            return '@en'
+        return "@pl"
 
     def should_restart(self):
         probability = 1-((1-self.restart_probability)**self.depth)

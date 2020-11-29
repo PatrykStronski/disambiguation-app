@@ -4,7 +4,7 @@ import csv
 tsv_file = open("/home/azath/Documents/THESIS/pwn-plwn-3.0.txt")
 read_tsv = csv.reader(tsv_file, delimiter="\t")
 
-URI = "neo4j://localhost/"
+URI = "neo4j://172.17.0.2/"
 DB_NAME = "neo4j"
 PREFIX = "http://plwordnet.pwr.wroc.pl/wordnet/synset/"
 
