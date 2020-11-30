@@ -33,6 +33,8 @@ class InitialGraph:
         princeton = self.initial_node_properties.get("princeton")
         if princeton:
             return '@en'
+        if self.initial_node_uri.startswith("http://dbpedia.org/resource/"):
+            return 'all'
         return "@pl"
 
     def should_restart(self):

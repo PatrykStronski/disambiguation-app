@@ -1,14 +1,14 @@
 from neo4j import GraphDatabase
 import csv
 
-tsv_file = open("/home/azath/Documents/THESIS/pwn-plwn-3.0.txt")
+tsv_file = open("/home/patryk/pwn-plwn-3.0.txt")
 read_tsv = csv.reader(tsv_file, delimiter="\t")
 
-URI = "neo4j://172.17.0.2/"
+URI = "neo4j://localhost/"
 DB_NAME = "neo4j"
 PREFIX = "http://plwordnet.pwr.wroc.pl/wordnet/synset/"
 
-driver = GraphDatabase.driver(URI)
+driver = GraphDatabase.driver(URI, auth=("neo4j", "123"))
 session = driver.session(database = DB_NAME)
 
 for row in read_tsv:

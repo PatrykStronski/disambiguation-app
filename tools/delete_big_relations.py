@@ -1,19 +1,19 @@
 from neo4j import GraphDatabase
 
-URI = "neo4j://172.17.0.2/"
+URI = "neo4j://localhost/"
 DB_NAME = "neo4j"
 COUNT= "10000"
 
-driver = GraphDatabase.driver(URI)
+driver = GraphDatabase.driver(URI, auth=("neo4j", "123"))
 session = driver.session(database = DB_NAME)
 
-to_delete = session.run("MATCH (n:Resource)-[r]-() WITH n,r, COUNT(r) AS cnt WHERE cnt > " + COUNT + " RETURN n.uri AS uri")
+to_delete = session.run("MATCH (n:Resource)-[r]-() WITH n, COUNT(r) AS cnt WHERE cnt > " + COUNT + " RETURN n.uri AS uri")
 for node in to_delete:
     node_uri = node["uri"]
     print("DELETE " + node_uri)
-    exists = session.run("MATCH (n:Resource {uri:'" +node_uri + "'}) RETURN n")
-    while exists.length > 0:
-        session.run("MATCH (n:Resource { uri: '" + node_uri + "'})-[r]-() DELETE r,n LIMIT 10000")
+    exists = session.run('MATCH (n:Resource {uri:"' +node_uri + '"}) RETURN n')
+    ex_array = [record for record in exists]
+    session.run('MATCH (n:Resource { uri: "' + node_uri + '"})-[r]-() DELETE r,n')
 
 session.close()
 driver.close()
