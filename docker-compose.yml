@@ -20,7 +20,7 @@ services:
   redis:
     image: redis:6.0
     user: ${UID:-1000}:${GID:-1000}
-    command: 'redis-server'
+    command: 'redis-server --appendonly yes'
     volumes:
       - ../storage/redis:/data
 
