@@ -34,10 +34,9 @@ class GraphDatabaseCreator:
         print("; ".join(output))
 
     def create_graph(self, start, end):
-        sum_entries = 0
-        sum_depth_distribution = [0] * 20
         for node_index in range(start, end):
             (node_uri, node_properties) = self.neo4j_mgr.get_node_by_index(node_index);
+            print("IN PROCESSING:" + node_uri)
             is_processed = self.redis_checker.get_processed_id(node_uri)
             if is_processed == "DONE":
                 print("The node has already been processed. Carrying on...")
