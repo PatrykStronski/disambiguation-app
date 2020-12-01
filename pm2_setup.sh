@@ -1,6 +1,6 @@
 #!/bin/bash
 cd ./src
-number_of_workers=$1
+number_of_workers=20
 nodes=6569091
 batch=$((nodes/number_of_workers))
 ind=0

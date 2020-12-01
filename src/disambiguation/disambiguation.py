@@ -19,10 +19,10 @@ class Disambiguation:
     lemmatizer = WordNetLemmatizer()
 
     def __init__(self):
-        nltk.download('wordnet')
-        nltk.download('punkt')
-        nltk.download('averaged_perceptron_tagger')
-        nltk.download('pl196x')
+        #nltk.download('wordnet')
+        #nltk.download('punkt')
+        #nltk.download('averaged_perceptron_tagger')
+        #nltk.download('pl196x')
         self.neo4j_mgr = Neo4jDisambiguation('neo4j')
 
     def get_words(self, text):
