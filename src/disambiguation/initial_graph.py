@@ -32,10 +32,10 @@ class InitialGraph:
     def extract_language(self):
         princeton = self.initial_node_properties.get("princeton")
         if princeton:
-            return '@en'
+            return "TRUE"
         if self.initial_node_uri.startswith("http://dbpedia.org/resource/"):
-            return 'all'
-        return "@pl"
+            return "ALL"
+        return "FALSE"
 
     def should_restart(self):
         probability = 1-((1-self.restart_probability)**self.depth)

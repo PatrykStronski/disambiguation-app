@@ -2,6 +2,7 @@ import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from services.neo4j_disambiguation import Neo4jDisambiguation
 from utils.disambiguation import merge_into_dataframe
+from utils.lemmatizer import Lemmatizer
 import re
 
 LANGUAGE_ALIAS = {
@@ -16,13 +17,9 @@ HIDE_SIGNS = True
 
 class Disambiguation:
     neo4j_mgr = None
-    lemmatizer = WordNetLemmatizer()
+    lemmatizer = Lemmatizer()
 
     def __init__(self):
-        #nltk.download('wordnet')
-        #nltk.download('punkt')
-        #nltk.download('averaged_perceptron_tagger')
-        #nltk.download('pl196x')
         self.neo4j_mgr = Neo4jDisambiguation('neo4j')
 
     def get_words(self, text):
@@ -95,21 +92,10 @@ class Disambiguation:
         candidates = candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
         return candidates.apply(lambda cand: self.count_interconnections_candidate_second(cand, candidates), axis=1)
 
-    def basify_words(self, tokens):
-        tagged = nltk.pos_tag(tokens)
-        lemmatized = []
-        for word in tagged:
-            if word[1].startswith("V"):
-                lemmatized.append(self.lemmatizer.lemmatize(word[0].lower(), "v"))
-            elif word[1].startswith("N"):
-                lemmatized.append(self.lemmatizer.lemmatize(word[0].lower()))
-            else:
-                lemmatized.append(word[0].lower())
-        return lemmatized
-
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
         words = self.get_words(text)
-        tokens = self.basify_words(words)
+        tokens = self.lemmatizer.lemmatize(text)
+        return
         candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_consists(word, LANGUAGE_ALIAS[lang]) for word in tokens])
         if candidates.empty:
             return { "data": [] }

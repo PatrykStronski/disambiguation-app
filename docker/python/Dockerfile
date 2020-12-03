@@ -8,7 +8,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-RUN pip install redis pandas numpy flask neo4j nltk pytest
+RUN pip install redis pandas numpy flask neo4j spacy pytest
 RUN apt -y install npm
 RUN npm i -g pm2
 

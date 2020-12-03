@@ -1,5 +1,5 @@
-nltk
 flask
+spacy
 neo4j
 pytest
 pandas
