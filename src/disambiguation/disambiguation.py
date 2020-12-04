@@ -1,5 +1,3 @@
-import nltk
-from nltk.stem.wordnet import WordNetLemmatizer
 from services.neo4j_disambiguation import Neo4jDisambiguation
 from utils.disambiguation import merge_into_dataframe
 from utils.lemmatizer import Lemmatizer

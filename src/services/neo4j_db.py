@@ -12,6 +12,19 @@ class Neo4jDb:
         self.driver = GraphDatabase.driver(self.URI)
         self.session = self.driver.session(database = self.database_name)
 
+    def map_related_nodes(self, record, node):
+        rel1 = record['relation'].type
+        rel2 = None
+        if record['relation2']:
+            rel2 = record['relation2'].type
+        return {
+            'node1': node,
+            'node2': record['node2'],
+            'relation': (rel1, rel2),
+            'weight': record['weight'] + 1
+        }
+
+
     def get_relation(self, node1, node2):
         result = self.session.run('MATCH (n {uri: "' + node1 + '"}) -[r]- (b {uri: "' + node2 + '"}) RETURN r AS relation')
         relation = [record['relation'] for record in result]
@@ -38,12 +51,7 @@ class Neo4jDb:
                 (c) -[r_triangle]-> (n) WHERE c.princeton = '+ princeton +' \
                 RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         result = self.session.run(query)
-        return [{
-            'node1': node,
-            'node2': record['node2'],
-            'relation': (record['relation'].type, record['relation2'].type),
-            'weight': record['weight'] + 1
-        } for record in result]
+        return [self.map_related_nodes(record, node) for record in result]
 
     def get_number_of_nodes(self):
         result = self.session.run('MATCH (n:Resource) RETURN COUNT(n) AS qty')
@@ -78,7 +86,10 @@ class Neo4jDb:
         self.session.run('MATCH (n) DELETE n')
 
     def create_relation(self, node1_uri, node2_uri, relations):
-        self.session.run('MATCH (start: Resource {uri: "' + node1_uri + '"}) MERGE (end:Resource {uri: "' + node2_uri + '"}) MERGE  (start)-[:' + relations[0] + ']->(end) MERGE  (end)-[:' + relations[1] + ']->(start) WITH end SET end.inSignatures = COALESCE(end.inSignatures, []) + "' + node1_uri + '"')
+        query = 'MATCH (start: Resource {uri: "' + node1_uri + '"}) MERGE (end:Resource {uri: "' + node2_uri + '"}) MERGE  (start)-[:' + relations[0] + ']->(end) WITH end SET end.inSignatures = COALESCE(end.inSignatures, []) + "' + node1_uri + '"' 
+        if relations[1]:
+            query = 'MATCH (start: Resource {uri: "' + node1_uri + '"}) MERGE (end:Resource {uri: "' + node2_uri + '"}) MERGE  (start)-[:' + relations[0] + ']->(end) MERGE  (end)-[:' + relations[1] + ']->(start) WITH end SET end.inSignatures = COALESCE(end.inSignatures, []) + "' + node1_uri + '"' 
+        self.session.run(query)
 
     def __del__(self):
         self.session.close()

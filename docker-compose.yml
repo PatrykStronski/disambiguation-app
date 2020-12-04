@@ -8,7 +8,6 @@ services:
       - ../storage/neo_src:/data
     environment:
       NEO4J_AUTH: ${NEOSRC_NEO4J_AUTH}
-      NEO4JLABS_PLUGINS: ["n10s"]
 
   neo_dest:
     image: neo4j:4.2.0
@@ -17,7 +16,6 @@ services:
       - ../storage/neo_dest:/data
     environment:
       NEO4J_AUTH: ${NEODEST_NEO4J_AUTH}
-      NEO4JLABS_PLUGINS: ["n10s"]
 
   redis:
     image: redis:6.0
