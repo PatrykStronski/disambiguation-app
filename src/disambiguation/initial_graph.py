@@ -89,11 +89,13 @@ class InitialGraph:
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
         print(strong_relations)
 
+    def create_relation(self, relation_row):
+        self.neo4j_new.create_relation(self.initial_node_uri, relation_row["node2"])
+
     def insert_graph(self):
         self.time = time.time()
         self.neo4j_new.create_node(self.initial_node_properties)
-        strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-        [self.neo4j_new.create_relation(self.initial_node_uri, node2) for node2 in strong_relations["node2"]]
+        self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits].apply(self.create_relation, axis=1)
         new_time = time.time()
         print("Processing OF relation creation:" + str(new_time - self.time))
         self.time = new_time

@@ -42,7 +42,7 @@ class GraphDatabaseCreator:
                 print("The node has already been processed. Carrying on...")
                 continue
             init_graph = InitialGraph(node_uri, node_properties, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new)
-            ret = init_graph.random_walk_with_restart()
+            init_graph.random_walk_with_restart()
             self.redis_checker.insert_processed_id(node_uri)
             if node_index % 100 == 0:
                 print("Created semsign for: " + str(node_index))
