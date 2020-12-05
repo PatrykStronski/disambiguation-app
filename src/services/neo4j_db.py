@@ -12,31 +12,11 @@ class Neo4jDb:
         self.driver = GraphDatabase.driver(self.URI)
         self.session = self.driver.session(database = self.database_name)
 
-    def map_related_nodes(self, record, node):
-        rel1 = record['relation'].type
-        rel2 = None
-        if record['relation2']:
-            rel2 = record['relation2'].type
+    def map_related_nodes(self, record):
         return {
-            'node1': node,
             'node2': record['node2'],
-            'relation': (rel1, rel2),
             'weight': record['weight'] + 1
         }
-
-
-    def get_relation(self, node1, node2):
-        result = self.session.run('MATCH (n {uri: "' + node1 + '"}) -[r]- (b {uri: "' + node2 + '"}) RETURN r AS relation')
-        relation = [record['relation'] for record in result]
-        return relation
-
-    def get_triangle_weight(self, node, node2):
-        result = self.session.run('MATCH (start:Resource {uri: "' + node + '"})-[rel1]-(second: Resource {uri: "' + node2 + '"}), connections_second=(second)-[rel2]-(third: Resource), triangle_connections=(third: Resource)-[rel3]-(start) RETURN COUNT(triangle_connections) AS cardinality')
-        return [record['cardinality'] for record in result][0] + 1
-
-    def get_related_nodes(self, node):
-        result = self.session.run('MATCH (n:Resource {uri: "' + node + '"}) -[r]- (b:Resource), (b) -[r2]- (n) RETURN b AS resource, r AS relation, r2 AS relation2')
-        return [(record['resource'], (record['relation'], record['relation2'])) for record in result]
 
     def get_related_nodes_weighted(self, node, princeton):
         query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) \
@@ -51,7 +31,7 @@ class Neo4jDb:
                 (c) -[r_triangle]-> (n) WHERE c.princeton = '+ princeton +' \
                 RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         result = self.session.run(query)
-        return [self.map_related_nodes(record, node) for record in result]
+        return [self.map_related_nodes(record) for record in result]
 
     def get_number_of_nodes(self):
         result = self.session.run('MATCH (n:Resource) RETURN COUNT(n) AS qty')
@@ -60,12 +40,6 @@ class Neo4jDb:
     def get_node_by_index(self, ind):
         result = self.session.run('MATCH (n:Resource) WHERE NOT n:skos__Concept RETURN n.uri AS resource, properties(n) AS properties SKIP ' + str(ind) + ' LIMIT 1')
         return [(record['resource'], record['properties'] ) for record in result][0]
-
-    def get_uri_single_node(self, node):
-        return node['uri']
-
-    def get_label_single_node(self, node):
-        return node['rdfs__label']
 
     def compose_props(self, properties):
         props = []
