@@ -1,5 +1,6 @@
 import random
 import pandas as pd
+import time
 
 class InitialGraph:
     initial_node_uri = ""
@@ -13,7 +14,7 @@ class InitialGraph:
     restart_probability = 0.0
     neo4j_mgr = None
     neo4j_new = None
-    language = "all"
+    princeton = "all"
 
     def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_mgr, neo4j_new):
         self.initial_node_uri = initial_node_uri
@@ -24,10 +25,11 @@ class InitialGraph:
         self.restart_probability = restart_probability
         self.neo4j_mgr = neo4j_mgr
         self.neo4j_new = neo4j_new
-        self.language = self.extract_language()
+        self.time = time.time()
+        self.princeton = self.extract_princeton()
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node2"])
 
-    def extract_language(self):
+    def extract_princeton(self):
         princeton = self.initial_node_properties.get("princeton")
         if princeton:
             return "TRUE"
@@ -59,7 +61,13 @@ class InitialGraph:
         if self.should_restart():
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
-        relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri, self.language))
+        new_time = time.time()
+        print("Processing till relations fetch:" + str(new_time - self.time))
+        self.time = new_time
+        relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri, self.princeton))
+        new_time = time.time()
+        print("Processing OF relations fetch:" + str(new_time - self.time))
+        self.time = new_time
         if relations.empty:
             if self.current_node_uri == self.initial_node_uri:
                 return
@@ -82,6 +90,10 @@ class InitialGraph:
         print(strong_relations)
 
     def insert_graph(self):
+        self.time = time.time()
         self.neo4j_new.create_node(self.initial_node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
         [self.neo4j_new.create_relation(self.initial_node_uri, node2) for node2 in strong_relations["node2"]]
+        new_time = time.time()
+        print("Processing OF relation creation:" + str(new_time - self.time))
+        self.time = new_time
