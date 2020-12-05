@@ -86,7 +86,7 @@ class Neo4jDb:
         self.session.run('MATCH (n) DELETE n')
 
     def create_relation(self, node1_uri, node2_uri):
-        query = 'MATCH (start: Resource {uri: "' + node1_uri + '"}) MERGE (end: Resource {uri: "' + node2_uri + '"}) MERGE  (start)-[:relatesTo]->(end})'
+        query = 'MATCH (start: Resource {uri: "' + node1_uri + '"}) MERGE (end: Resource {uri: "' + node2_uri + '"}) MERGE  (start)-[:relatesTo]->(end)'
         self.session.run(query)
 
     def __del__(self):

@@ -92,4 +92,4 @@ class InitialGraph:
     def insert_graph(self):
         self.neo4j_new.create_node(self.initial_node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-        [self.neo4j_new.create_relation(node1, node2) for node1, node2, relations in zip(strong_relations["node1"], strong_relations["node2"])]
+        [self.neo4j_new.create_relation(node1, node2) for node1, node2 in zip(strong_relations["node1"], strong_relations["node2"])]
