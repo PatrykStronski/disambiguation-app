@@ -61,8 +61,10 @@ class Neo4jDb:
 
     def create_relation_suffix(self, node2_list, node1_uri):
         query = ''
+        index = 0
         for node2 in node2_list:
-            query += ' MERGE(end: Resource {uri: "' + node2 + '"}) MERGE(start) -[: relatesTo]->(end)'
+            query += ' MERGE(end' + str(index) + ': Resource {uri: "' + node2 + '"}) MERGE(start) -[: relatesTo]->(end' + str(index) + ')'
+            index += 1
         return query
 
     def create_relation(self, node1_uri, node2_series):
