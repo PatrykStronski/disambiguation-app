@@ -67,8 +67,11 @@ class Neo4jDb:
             index += 1
         return query
 
-    def create_relation(self, node1_uri, node2_series):
-        query = 'MATCH (start: Resource {uri: "' + node1_uri + '"})' + self.create_relation_suffix(node2_series.values, node1_uri)
+    def create_relation(self, node1_uri, node2_list):
+        if len(node2_list) == 0:
+            print('No semsigns in ' + node1_uri);
+            return
+        query = 'MATCH (start: Resource {uri: "' + node1_uri + '"})' + self.create_relation_suffix(node2_list, node1_uri)
         self.session.run(query)
 
     def __del__(self):

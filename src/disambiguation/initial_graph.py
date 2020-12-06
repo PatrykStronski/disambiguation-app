@@ -61,13 +61,10 @@ class InitialGraph:
         if self.should_restart():
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
-        new_time = time.time()
-        print("Processing till relations fetch:" + str(new_time - self.time))
-        self.time = new_time
         relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri, self.princeton))
-        new_time = time.time()
-        print("Processing OF relations fetch:" + str(new_time - self.time))
-        self.time = new_time
+        #new_time = time.time()
+        #print("Processing OF relations fetch:" + str(new_time - self.time))
+        #self.time = new_time
         if relations.empty:
             if self.current_node_uri == self.initial_node_uri:
                 return
@@ -90,10 +87,10 @@ class InitialGraph:
         print(strong_relations)
 
     def insert_graph(self):
-        self.time = time.time()
+        #self.time = time.time()
         self.neo4j_new.create_node(self.initial_node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-        self.neo4j_new.create_relation(self.initial_node_uri, strong_relations["node2"])
-        new_time = time.time()
-        print("Processing OF relation creation:" + str(new_time - self.time))
-        self.time = new_time
+        self.neo4j_new.create_relation(self.initial_node_uri, strong_relations["node2"].values)
+        #new_time = time.time()
+        #print("Processing OF relation creation:" + str(new_time - self.time))
+        #self.time = new_time
