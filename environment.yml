@@ -1,0 +1,11 @@
+name: disambiguation_graph
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - flask
+  - spacy
+  - neo4j
+  - pytest
+  - pandas
+  - redis
