@@ -2,10 +2,9 @@ name: disambiguation_graph
 channels:
   - conda-forge
 dependencies:
-  - python=3.8
+  - python
   - flask
   - spacy
-  - neo4j
   - pytest
   - pandas
   - redis
