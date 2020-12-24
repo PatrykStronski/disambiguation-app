@@ -10,7 +10,7 @@ class Lemmatizer:
 
     def lemmatize_en(self, text):
         doc = self.nlp(text)
-        print(doc)
+        return [token.lemma_ for token in doc]
 
     def lemmatize(self, text, language):
         if language == "polish":
