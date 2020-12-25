@@ -28,7 +28,9 @@ services:
     build: ./docker/python
     volumes:
       - ./:/app
+    runtime: nvidia
     environment:
       - PM2_PROC_NUM
       - APP_MODE
+      - NVIDIA_VISIBLE_DEVICES
 
