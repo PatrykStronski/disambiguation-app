@@ -1,6 +1,6 @@
 import random
 import pandas as pd
-import cudf
+import cuDf
 import time
 
 class InitialGraph:
