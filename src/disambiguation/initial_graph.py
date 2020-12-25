@@ -1,5 +1,6 @@
 import random
 import pandas as pd
+import cudf
 import time
 
 class InitialGraph:
@@ -27,7 +28,7 @@ class InitialGraph:
         self.neo4j_new = neo4j_new
         self.time = time.time()
         self.princeton = self.extract_princeton()
-        self.node_visit_counts = pd.DataFrame(columns = ["count", "node2"])
+        self.node_visit_counts = cuDf.DataFrame.from_pandas(pd.DataFrame(columns = ["count", "node2"]))
 
     def extract_princeton(self):
         princeton = self.initial_node_properties.get("princeton")
@@ -61,7 +62,8 @@ class InitialGraph:
         if self.should_restart():
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
-        relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri, self.princeton))
+        relations_cpu = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri, self.princeton))
+        relations = cuDf.DataFrame.from_pandas(relations_cpu)
         #new_time = time.time()
         #print("Processing OF relations fetch:" + str(new_time - self.time))
         #self.time = new_time

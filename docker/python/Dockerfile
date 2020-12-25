@@ -10,7 +10,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 RUN pip3 install --upgrade pip
-RUN pip3 install redis pandas numpy flask neo4j spacy pytest
+RUN pip3 install redis pandas numpy flask neo4j spacy pytest rapids
 RUN python3 -m spacy download en_core_web_sm
 RUN apt -y install nodejs
 RUN apt -y install npm
