@@ -25,13 +25,13 @@ class Neo4jDb:
             (c) -[r_triangle]-> (n) \
             RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         if princeton != "ALL":
-            if not princeton:
+            if princeton == "FALSE":
                 query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE b.princeton = '+ princeton +' \
                     OPTIONAL MATCH (b) -[r2]-> (n) \
                     OPTIONAL MATCH (b) --> (c: Resource), \
                     (c) -[r_triangle]-> (n) WHERE c.princeton = '+ princeton +' \
                     RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
-            elif princeton:
+            elif princeton == "TRUE":
                 query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE ANY (x IN b.skos__prefLabel WHERE x CONTAINS "@en") \
                     OPTIONAL MATCH (b) -[r2]-> (n) \
                     OPTIONAL MATCH (b) --> (c: Resource), \
