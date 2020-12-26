@@ -32,5 +32,5 @@ services:
     environment:
       - PM2_PROC_NUM
       - APP_MODE
-      - NVIDIA_VISIBLE_DEVICES
+      - NVIDIA_VISIBLE_DEVICES=1
 
