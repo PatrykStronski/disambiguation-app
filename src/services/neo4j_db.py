@@ -37,6 +37,7 @@ class Neo4jDb:
                     OPTIONAL MATCH (b) --> (c: Resource), \
                     (c) -[r_triangle]-> (n)  WHERE ANY (x IN c.skos__prefLabel WHERE x CONTAINS "@en")\
                     RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
+        print(query)
         result = self.session.run(query)
         return [self.map_related_nodes(record) for record in result]
 

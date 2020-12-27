@@ -12,18 +12,18 @@ class InitialGraph:
     iterations_level = 0
     threshold_visits = 1
     restart_probability = 0.0
-    neo4j_mgr = None
+    neo4j_src = None
     neo4j_new = None
     princeton = "all"
 
-    def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_mgr, neo4j_new):
+    def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_src, neo4j_new):
         self.initial_node_uri = initial_node_uri
         self.current_node_uri = initial_node_uri
         self.initial_node_properties = initial_node_properties
         self.max_iterations = depth
         self.threshold_visits = threshold_visits
         self.restart_probability = restart_probability
-        self.neo4j_mgr = neo4j_mgr
+        self.neo4j_src = neo4j_src
         self.neo4j_new = neo4j_new
         self.time = time.time()
         self.princeton = self.extract_princeton()
@@ -61,7 +61,7 @@ class InitialGraph:
         if self.should_restart():
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
-        relations = pd.DataFrame(self.neo4j_mgr.get_related_nodes_weighted(self.current_node_uri, self.princeton))
+        relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton))
         #new_time = time.time()
         #print("Processing OF relations fetch:" + str(new_time - self.time))
         #self.time = new_time
