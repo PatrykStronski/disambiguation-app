@@ -18,14 +18,14 @@ class Neo4jDb:
             'weight': record['weight'] + 1
         }
 
-    def get_related_nodes_weighted(self, node, princeton):
-        query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) \
+    def get_related_nodes_weighted(self, node, princeton, initial_uri):
+        query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE b.uri <> "' + initial_uri + '" \
             OPTIONAL MATCH (b) -[r2]-> (n) \
             OPTIONAL MATCH (b) --> (c: Resource), \
             (c) -[r_triangle]-> (n) \
             RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
         if princeton != "ALL":
-            query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE b.princeton = '+ princeton +' \
+            query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE b.princeton = '+ princeton +' AND b.uri <> "' + initial_uri + '"  \
                 OPTIONAL MATCH (b) -[r2]-> (n) \
                 OPTIONAL MATCH (b) --> (c: Resource), \
                 (c) -[r_triangle]-> (n) WHERE c.princeton = '+ princeton +' \
