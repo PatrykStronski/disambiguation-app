@@ -59,20 +59,13 @@ class Neo4jDb:
         self.session.run('MATCH (n)-[r]-(b) DELETE r')
         self.session.run('MATCH (n) DELETE n')
 
-    def create_relation_suffix(self, node2_list, node1_uri):
-        query = ''
-        index = 0
-        for node2 in node2_list:
-            query += ' MERGE(end' + str(index) + ': Resource {uri: "' + node2 + '"}) MERGE(start) -[: relatesTo]->(end' + str(index) + ')'
-            index += 1
-        return query
-
     def create_relation(self, node1_uri, node2_list):
         if len(node2_list) == 0:
             print('No semsigns in ' + node1_uri);
             return
-        query = 'MATCH (start: Resource {uri: "' + node1_uri + '"})' + self.create_relation_suffix(node2_list, node1_uri)
-        self.session.run(query)
+        for node2 in node2_list:
+            query = 'MATCH (start: Resource {uri: "' + node1_uri + '"}) MERGE (end: Resource {uri: "'+ node2 +'"}) MERGE (start) -[:relatesTo]->(end)'
+            self.session.run(query)
 
     def __del__(self):
         self.session.close()
