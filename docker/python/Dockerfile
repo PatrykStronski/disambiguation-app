@@ -10,8 +10,10 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 WORKDIR /app
-RUN pip install neo4j pytest
-RUN conda install redis pandas flask spacy
+COPY ./ ./
+ENV CONDA_DEFAULT_ENV "rapids"
+RUN conda info --envs
+RUN pip install neo4j redis pandas flask spacy pytest
 RUN python -m spacy download en_core_web_sm
 RUN apt -y install build-essential apt-transport-https lsb-release ca-certificates curl
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -

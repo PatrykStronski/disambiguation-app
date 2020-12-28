@@ -2,6 +2,7 @@ import random
 import pandas as pd
 import cudf
 import time
+import random
 
 class InitialGraph:
     initial_node_uri = ""
@@ -47,7 +48,7 @@ class InitialGraph:
         self.random_walk_with_restart()
 
     def choose_relation(self, relations):
-        return relations.sample(weights = relations["weight"].values).to_dict(orient = "records")[0]
+        return relations.iloc[random.randint(0, relations.shape[1])]
 
     def increment_visits(self, picked_relation):
         existing_entry = self.node_visit_counts.loc[(self.node_visit_counts["node2"] == picked_relation["node2"])]
