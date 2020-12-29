@@ -24,11 +24,20 @@ services:
     volumes:
       - ../storage/redis:/data
 
+  wcrft:
+    user: root
+    build: ./docker/wcrft
+    image: clarinpl/nlptools
+    environment:
+      - SSH_PUBLICKEY
+
   app:
     build: ./docker/python
     volumes:
       - ./:/app
     environment:
+      - SSH_PRIVATEKEY
+      - SSH_PUBLICKEY
       - PM2_PROC_NUM
       - APP_MODE
 
