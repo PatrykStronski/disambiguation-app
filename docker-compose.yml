@@ -8,6 +8,10 @@ services:
       - ../storage/neo_src:/data
     environment:
       NEO4J_AUTH: ${NEOSRC_NEO4J_AUTH}
+    deploy:
+      resources:
+        limits:
+          memory: "${MAX_NEO_RAM}"
 
   neo_dest:
     image: neo4j:4.2.0
@@ -16,6 +20,10 @@ services:
       - ../storage/neo_dest:/data
     environment:
       NEO4J_AUTH: ${NEODEST_NEO4J_AUTH}
+    deploy:
+      resources:
+        limits:
+          memory: "${MAX_NEO_RAM}"
 
   redis:
     image: redis:6.0
