@@ -29,6 +29,10 @@ services:
     image: redis:6.0
     user: ${UID:-1000}:${GID:-1000}
     command: 'redis-server --appendonly yes'
+    deploy:
+      resources:
+        limits:
+          memory: "${MAX_REDIS_RAM}"
     volumes:
       - ../storage/redis:/data
 
@@ -43,6 +47,10 @@ services:
     build: ./docker/python
     volumes:
       - ./:/app
+    deploy:
+      resources:
+        limits:
+          memory: "${MAX_APP_RAM}"
     environment:
       - SSH_PRIVATEKEY
       - SSH_PUBLICKEY
