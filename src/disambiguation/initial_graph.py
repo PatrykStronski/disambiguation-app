@@ -62,6 +62,8 @@ class InitialGraph:
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
         relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri), columns = ["node2", "weight"])
+        if self.iterations_level == 0:
+            self.initial_node_properties["deg"] = relations.shape[0]
         #new_time = time.time()
         #print("Processing OF relations fetch:" + str(new_time - self.time))
         #self.time = new_time

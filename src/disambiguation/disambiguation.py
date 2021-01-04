@@ -8,10 +8,8 @@ LANGUAGE_ALIAS = {
     "english": "@en"
 }
 
-DISAMBIGUATION_THRESHOLD = 0.0
+DISAMBIGUATION_THRESHOLD = 0.4
 AMBIGUITY_LEVEL = 5
-TOP = 5
-HIDE_SIGNS = True
 
 class Disambiguation:
     neo4j_mgr = None
@@ -40,6 +38,8 @@ class Disambiguation:
         return candidates.loc[candidates.score >= DISAMBIGUATION_THRESHOLD]
 
     def calculate_sum_score(self, cand_set, token_nmb):
+        if cand_set.empty:
+            return 0
         return (cand_set["deg"] * cand_set["semantic_interconnections"] / token_nmb).sum()
 
     def calculate_entity_score(self, cand, sum_scores, token_number, token):
@@ -55,7 +55,9 @@ class Disambiguation:
         token_number = len(tokens) -1
         for token in tokens:
             sum_scores = self.calculate_sum_score(candidates.loc[candidates.basic_form == token], token_number)
-            candidates = candidates.apply(lambda cand: self.calculate_entity_score(cand, sum_scores, token_number, token), axis=1)
+            if sum_scores > 0:
+                candidates = candidates.apply(
+                    lambda cand: self.calculate_entity_score(cand, sum_scores, token_number, token), axis=1)
         return candidates
 
     def contains_uri(self, uri, semsign):
@@ -92,9 +94,8 @@ class Disambiguation:
 
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
         words = self.get_words(text)
-        tokens = self.lemmatizer.lemmatize(text)
-        return
-        candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_consists(word, LANGUAGE_ALIAS[lang]) for word in tokens])
+        tokens = self.lemmatizer.lemmatize(" ".join(words), lang)
+        candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_regexp(word, LANGUAGE_ALIAS[lang]) for word in tokens])
         if candidates.empty:
             return { "data": [] }
         candidates = self.densest_subgraph(candidates)

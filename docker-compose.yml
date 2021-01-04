@@ -32,12 +32,12 @@ services:
     volumes:
       - ../storage/redis:/data
 
-  wcrft:
-    user: root
-    build: ./docker/wcrft
-    image: clarinpl/nlptools
-    environment:
-      - SSH_PUBLICKEY
+#  wcrft:
+#    user: root
+#    build: ./docker/wcrft
+#    image: clarinpl/cpp
+#    environment:
+#      - SSH_PUBLICKEY
 
   app:
     build: ./docker/python
