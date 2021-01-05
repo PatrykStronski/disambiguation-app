@@ -1,6 +1,7 @@
 from disambiguation.initial_graph import InitialGraph
 from services.neo4j_db import Neo4jDb
 from services.redis_checker import RedisChecker
+from utils.lemmatizer import Lemmatizer
 import time
 
 class GraphDatabaseCreator:
@@ -13,6 +14,7 @@ class GraphDatabaseCreator:
     max_depth = 0
     threshold_visits = 0
     restart_probability = 0.0
+    lemmatizer=  None
     def __init__(self, depth, threshold_visits, restart_probability):
         self.neo4j_mgr = Neo4jDb(self.db_src_uri, self.db_src)
         self.neo4j_new = Neo4jDb(self.db_dest_uri, self.db_dest)
@@ -20,6 +22,7 @@ class GraphDatabaseCreator:
         self.threshold_visits = threshold_visits
         self.restart_probability = restart_probability
         self.redis_checker = RedisChecker()
+        self.lemmatizer = Lemmatizer()
 
     def add_depth_distributions(self, dist1, dist2):
         for ind in range(0,20):
@@ -34,6 +37,7 @@ class GraphDatabaseCreator:
         print("; ".join(output))
 
     def create_graph(self, start, end):
+
         for node_index in range(start, end):
             (node_uri, node_properties) = self.neo4j_mgr.get_node_by_index(node_index);
             print("IN PROCESSING:" + node_uri)
@@ -41,7 +45,7 @@ class GraphDatabaseCreator:
             if is_processed == "DONE":
                 print("The node has already been processed. Carrying on...")
                 continue
-            init_graph = InitialGraph(node_uri, node_properties, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new)
+            init_graph = InitialGraph(node_uri, node_properties, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new, self.lemmatizer)
             init_graph.random_walk_with_restart()
             self.redis_checker.insert_processed_id(node_uri)
             if node_index % 100 == 0:
@@ -50,8 +54,10 @@ class GraphDatabaseCreator:
                     del self.neo4j_mgr
                     del self.neo4j_new
                     del self.redis_checker
+                    del self.lemmatizer
                     time.sleep(0.3)
                     self.neo4j_mgr = Neo4jDb(self.db_src_uri, self.db_src)
                     self.neo4j_new = Neo4jDb(self.db_dest_uri, self.db_dest)
                     self.redis_checker = RedisChecker()
+                    self.lemmatizer = Lemmatizer()
             init_graph.insert_graph()

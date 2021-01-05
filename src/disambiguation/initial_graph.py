@@ -14,9 +14,11 @@ class InitialGraph:
     restart_probability = 0.0
     neo4j_src = None
     neo4j_new = None
+    lemmatizer = None
     princeton = "all"
 
-    def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_src, neo4j_new):
+    def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_src, neo4j_new, lemmatizer):
+        self.lemmatizer = lemmatizer
         self.initial_node_uri = initial_node_uri
         self.current_node_uri = initial_node_uri
         self.initial_node_properties = initial_node_properties
@@ -27,7 +29,15 @@ class InitialGraph:
         self.neo4j_new = neo4j_new
         self.time = time.time()
         self.princeton = self.extract_princeton()
+        self.initial_node_properties["labels"] = self.lemmatize_labels()
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node2"])
+
+    def lemmatize_labels(self):
+        labels = []
+        for prop in self.initial_node_properties.keys():
+            if "label" in prop.lower() and type(self.initial_node_properties[prop]) is list:
+                labels += self.lemmatizer.lemmatize_labels(self.initial_node_properties[prop])
+        return labels
 
     def extract_princeton(self):
         princeton = self.initial_node_properties.get("princeton")
