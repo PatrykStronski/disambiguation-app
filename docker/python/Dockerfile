@@ -3,18 +3,19 @@ FROM rapidsai/rapidsai
 ENV DOCKERIZE_VERSION v0.6.1
 
 RUN umask 022
-RUN apt update && apt -y upgrade
+RUN apt update --fix-missing && apt -y upgrade
 RUN apt-get install -y wget
 RUN apt-get install -y ssh software-properties-common
 RUN wget -O - http://sgjp.pl/apt/sgjp.gpg.key | apt-key add -
 RUN apt-add-repository http://download.sgjp.pl/apt/ubuntu
 RUN apt update
-RUN apt install morfeusz2 -y
+RUN apt install python-xmltodict -y
+#RUN apt install morfeusz2 -y
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 WORKDIR /app
-RUN pip install redis pandas numpy flask neo4j spacy pytest toolz
+RUN pip install redis pandas numpy flask neo4j spacy pytest toolz xmltodict
 #RUN pip install -U spacy[cuda]
 RUN python -m spacy download en_core_web_sm
 RUN python -m spacy download pl_core_news_sm
