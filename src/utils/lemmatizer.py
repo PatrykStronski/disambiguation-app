@@ -40,7 +40,6 @@ class Lemmatizer:
     def download_extract_lemmatization(self, download_id):
         lemmatized_xml = requests.get(self.URI_GETLEMMATIZED + download_id)
         lemmatization_data = json.loads(json.dumps(xmltodict.parse(lemmatized_xml.text)))
-        print(lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"])
         if type(lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]) is not list:
             return [lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"].get("lex").get("base")]
         return [tok.get("lex").get("base") for tok in lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]]
