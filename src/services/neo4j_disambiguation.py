@@ -19,6 +19,11 @@ class Neo4jDisambiguation:
 
     def find_word_regexp(self, word, lang_tag):
         print(word)
+        result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE ANY(x IN n.labels WHERE x =~ '(?i).*\\\\b" + word + "\\\\b.*') RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
+        return [{ "uri": record["uri"], "source": "prefLabel", "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result]
+
+    def find_word_regexp_old(self, word, lang_tag):
+        print(word)
         result_pref = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE ANY(x IN n.skos__prefLabel WHERE x =~ '(?i).*\\\\b" + word + "\\\\b.*') RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.skos__prefLabel AS prefLabel")
         result_alt = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE ANY(x IN n.skos__altLabel WHERE x =~ '(?i).*\\\\b" + word + "\\\\b.*') RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.skos__prefLabel AS prefLabel")
         result_label = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE ANY(x IN n.skos__label WHERE x =~ '(?i).*\\\\b" + word + "\\\\b.*') RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.skos__label AS label")

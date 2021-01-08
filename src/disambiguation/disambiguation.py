@@ -96,6 +96,7 @@ class Disambiguation:
         words = self.get_words(text)
         tokens = self.lemmatizer.lemmatize(" ".join(words), lang)
         candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_regexp(word, LANGUAGE_ALIAS[lang]) for word in tokens])
+        print(candidates.shape)
         if candidates.empty:
             return { "data": [] }
         candidates = self.densest_subgraph(candidates)

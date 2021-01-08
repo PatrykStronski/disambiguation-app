@@ -18,7 +18,6 @@ WORKDIR /app
 RUN pip install redis pandas numpy flask neo4j spacy pytest toolz xmltodict
 #RUN pip install -U spacy[cuda]
 RUN python -m spacy download en_core_web_sm
-RUN python -m spacy download pl_core_news_sm
 RUN apt -y install build-essential apt-transport-https lsb-release ca-certificates curl
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt -y install nodejs

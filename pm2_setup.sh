@@ -13,6 +13,7 @@ until [ $ind -eq $((number_of_workers-1)) ]; do
   strt=$((strt+batch))
   end=$((strt+batch))
   ind=$((ind+1))
+  sleep 4
 done
 end=$nodes
 echo "${strt}  ${end}"

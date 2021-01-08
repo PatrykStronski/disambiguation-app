@@ -6,11 +6,8 @@ import ast
 import json
 import xmltodict
 
-#spacy.prefer_gpu()
-
 class Lemmatizer:
     nlp_en = None
-    nlp_pl = None
     URI_STARTTASK = "https://ws.clarin-pl.eu/nlprest2/base/startTask/"
     BODY_STARTTASK = {
         "application": "ws.clarin-pl.eu",
@@ -24,12 +21,11 @@ class Lemmatizer:
 
     def __init__(self):
         self.nlp_en = spacy.load("en_core_web_sm")
-        self.nlp_pl = spacy.load("pl_core_news_sm")
 
     def check_if_lemmatized(self, task_id):
         retries_used = 0
         while retries_used < self.MAX_RETRIES:
-            time.sleep(0.1)
+            time.sleep(0.2)
             retries_used += 1
             req = requests.get(self.URI_CHECKSTATUS + task_id)
             status = ast.literal_eval(req.text)
@@ -64,6 +60,9 @@ class Lemmatizer:
         return self.lemmatize_en(text)
 
     def lemmatize_detect_language(self, word):
+        """ This method can only be used  by initial graph"""
+        if len(word.split(' ')) < 2:
+            return word
         if word.endswith("@en"):
             return " ".join(self.lemmatize_en(word[:-3]))+"@en"
         elif word.endswith("@pl"):
