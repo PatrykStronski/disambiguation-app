@@ -95,3 +95,34 @@ def test_increment_visits_different_entry():
     init_graph.increment_visits(picked_relation)
     assert init_graph.node_visit_counts.shape == (1,5)
     assert { "count": 2, "journey_length": 1.0, "relation": "rel4", "node1": "nOld", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
+
+def test_filter_labels_supported_lang():
+    init_graph = InitialGraph("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
+    labels = ["label1@pl", "label2@bg", "label3@en"]
+    labels_filtered = init_graph.filter_labels_supported_lang(labels)
+    assert len(labels_filtered) == 2
+    assert labels_filtered[0] == "label1@pl"
+    assert labels_filtered[1] == "label3@en"
+
+def test_filter_labels_supported_lang_all_good():
+    init_graph = InitialGraph("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
+    labels = ["label1@pl", "label2@pl", "label3@en"]
+    labels_filtered = init_graph.filter_labels_supported_lang(labels)
+    assert len(labels_filtered) == 3
+    assert labels_filtered[0] == "label1@pl"
+    assert labels_filtered[1] == "label2@pl"
+    assert labels_filtered[2] == "label3@en"
+
+def test_has_language_good():
+    init_graph = InitialGraph("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
+    label = "label1@pl"
+    assert init_graph.has_language(label) == True
+    label = "label 1@pl"
+    assert init_graph.has_language(label) == True
+
+def test_has_language_good():
+    init_graph = InitialGraph("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
+    label = "label1@bg"
+    assert init_graph.has_language(label) == False
+    label = "label 1@de"
+    assert init_graph.has_language(label) == False

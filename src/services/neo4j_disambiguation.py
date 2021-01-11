@@ -1,5 +1,4 @@
 from neo4j import GraphDatabase
-import toolz
 
 class Neo4jDisambiguation:
     URI = "neo4j://neo_dest:7687/"
@@ -12,22 +11,12 @@ class Neo4jDisambiguation:
         self.driver = GraphDatabase.driver(self.URI)
         self.session = self.driver.session(database = self.database_name)
 
-    def get_relation(self, node1, node2):
-        result = self.session.run("MATCH (n {uri: '" + node1 + "'}) -[r]- (b {uri: '" + node2 + "'}) RETURN r AS relation")
-        relation = [record["relation"] for record in result]
-        return relation
-
-    def find_word_regexp(self, word, lang_tag):
-        print(word)
-        result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE ANY(x IN n.labels WHERE x =~ '(?i).*\\\\b" + word + "\\\\b.*') RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
-        return [{ "uri": record["uri"], "source": "prefLabel", "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result]
-
-    def find_word_regexp_old(self, word, lang_tag):
-        print(word)
-        result_pref = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE ANY(x IN n.skos__prefLabel WHERE x =~ '(?i).*\\\\b" + word + "\\\\b.*') RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.skos__prefLabel AS prefLabel")
-        result_alt = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE ANY(x IN n.skos__altLabel WHERE x =~ '(?i).*\\\\b" + word + "\\\\b.*') RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.skos__prefLabel AS prefLabel")
-        result_label = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE ANY(x IN n.skos__label WHERE x =~ '(?i).*\\\\b" + word + "\\\\b.*') RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.skos__label AS label")
-        res_pref = [{ "uri": record["uri"], "source": "prefLabel", "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result_pref]
-        res_alt = [{ "uri": record["uri"], "source": "altLabel", "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result_alt]
-        res_label = [{ "uri": record["uri"], "source": "label", "deg": record["deg"], "sign": record["sign"], "labels": record["label"] } for record in result_label]
-        return toolz.unique(res_alt + res_pref + res_label, key=lambda x: x["uri"])
+    def find_word_labels(self, word, lang_tag):
+        print(word + lang_tag)
+        if len(word) < 3:
+            return []
+        if lang_tag == "polish":
+            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + word + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
+        else:
+            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_english CONTAINS '" + word + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
+        return [{ "uri": record["uri"], "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result]

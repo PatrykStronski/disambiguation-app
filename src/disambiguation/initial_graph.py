@@ -1,6 +1,7 @@
 import random
 import pandas as pd
 import time
+from config import SUPPORTED_LANGUAGES_SUFFIXES, SUPPORTED_LANGUAGES, LANGUAGE_ALIAS, PHRASE_SEPARATOR
 
 class InitialGraph:
     initial_node_uri = ""
@@ -29,15 +30,48 @@ class InitialGraph:
         self.neo4j_new = neo4j_new
         self.time = time.time()
         self.princeton = self.extract_princeton()
-        self.initial_node_properties["labels"] = self.lemmatize_labels()
+        self.create_lemmatized_labels()
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node2"])
 
-    def lemmatize_labels(self):
+    def has_language(self, label):
+        for suffix in SUPPORTED_LANGUAGES_SUFFIXES:
+            if label.endswith(suffix):
+                return True
+        return False
+
+    def filter_labels_supported_lang(self, labels):
+        return list(filter(self.has_language, labels))
+
+    def filter_labels_lang(self, labels, lang):
+        return list(filter(lambda label: label.endswith(LANGUAGE_ALIAS[lang]), labels))
+
+    def detect_langauge(self, label):
+        for lang in SUPPORTED_LANGUAGES:
+            if label.endswith(LANGUAGE_ALIAS[lang]):
+                return lang
+        return None
+
+    def lemmatize_labels_old(self):
         labels = []
         for prop in self.initial_node_properties.keys():
             if "label" in prop.lower() and type(self.initial_node_properties[prop]) is list:
-                labels += self.lemmatizer.lemmatize_labels(self.initial_node_properties[prop])
+                labels += self.lemmatizer.lemmatize_labels(self.filter_labels_lang(self.initial_node_properties[prop]))
         return labels
+
+    def create_lemmatized_labels(self):
+        for prop in self.initial_node_properties.keys():
+            if "label" in prop.lower() and type(self.initial_node_properties[prop]) is list:
+                for label in self.initial_node_properties[prop]:
+                    language = self.detect_langauge(label)
+                    if language:
+                        if self.initial_node_properties["labels_"+language]:
+                            self.initial_node_properties["labels_" + language] += self.lemmatizer.lemmatize(label, language, False)
+                        else:
+                            self.initial_node_properties["labels_" + language] = self.lemmatizer.lemmatize(label, language, False)
+        for lang in SUPPORTED_LANGUAGES:
+            if type(self.initial_node_properties.get("labels_" + lang)) is list:
+                self.initial_node_properties["labels_" + lang] = " ".join(set(self.initial_node_properties["labels_" + lang]))
+
 
     def extract_princeton(self):
         princeton = self.initial_node_properties.get("princeton")
@@ -71,12 +105,13 @@ class InitialGraph:
         if self.should_restart():
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
+        self.time = time.time()
         relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri), columns = ["node2", "weight"])
         if self.iterations_level == 0:
             self.initial_node_properties["deg"] = relations.shape[0]
-        #new_time = time.time()
-        #print("Processing OF relations fetch:" + str(new_time - self.time))
-        #self.time = new_time
+        new_time = time.time()
+        print("Processing OF relations fetch:" + str(new_time - self.time))
+        self.time = new_time
         if relations.empty:
             if self.current_node_uri == self.initial_node_uri:
                 return
@@ -92,6 +127,8 @@ class InitialGraph:
         self.increment_visits(picked_relation)
         self.current_node_uri = picked_relation["node2"]
         self.iterations_level += 1
+        new_time = time.time()
+        print("Processing OF calculations PANDAS fetch:" + str(new_time - self.time))
         return self.random_walk_with_restart()
 
     def get_graph(self):

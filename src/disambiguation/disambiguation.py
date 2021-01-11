@@ -1,15 +1,8 @@
 from services.neo4j_disambiguation import Neo4jDisambiguation
 from utils.disambiguation import merge_into_dataframe
 from utils.lemmatizer import Lemmatizer
+from config import DISAMBIGUATION_THRESHOLD, AMBIGUITY_LEVEL
 import re
-
-LANGUAGE_ALIAS = {
-    "polish": "@pl",
-    "english": "@en"
-}
-
-DISAMBIGUATION_THRESHOLD = 0.4
-AMBIGUITY_LEVEL = 5
 
 class Disambiguation:
     neo4j_mgr = None
@@ -94,13 +87,15 @@ class Disambiguation:
 
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
         words = self.get_words(text)
-        tokens = self.lemmatizer.lemmatize(" ".join(words), lang)
-        candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_regexp(word, LANGUAGE_ALIAS[lang]) for word in tokens])
+        tokens = list(filter(lambda word: word is not "-AGLT-", self.lemmatizer.lemmatize(" ".join(words), lang, True)))
+        candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_labels(token, lang) for token in tokens])
         print(candidates.shape)
         if candidates.empty:
             return { "data": [] }
-        candidates = self.densest_subgraph(candidates)
+        candidates = self.calculate_semantic_interconnections(candidates)
+        candidates = self.calculate_score(candidates)
         candidates = self.filter_candidates(candidates)
+        candidates = self.densest_subgraph(candidates)
         return {
             "data": candidates.to_dict("records")
         }
