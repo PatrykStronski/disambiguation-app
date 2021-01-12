@@ -1,8 +1,9 @@
 #!/bin/bash
 cd ./src
 number_of_workers=${PM2_PROC_NUM}
+nodes=1000000
 #nodes=345000
-nodes=6569091
+#nodes=6569091
 batch=$((nodes/number_of_workers))
 ind=0
 strt=0
