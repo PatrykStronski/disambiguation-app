@@ -7,6 +7,7 @@ services:
     volumes:
       - ../storage/neo_src:/data
     environment:
+      NEO4j_dbms.memory.pagecache.size: ${NEO_PAGESIZE}
       NEO4J_AUTH: ${NEOSRC_NEO4J_AUTH}
     deploy:
       resources:
@@ -19,6 +20,7 @@ services:
     volumes:
       - ../storage/neo_dest:/data
     environment:
+      NEO4j_dbms.memory.pagecache.size: ${NEO_PAGESIZE}
       NEO4J_AUTH: ${NEODEST_NEO4J_AUTH}
     deploy:
       resources:

@@ -7,9 +7,12 @@ import re
 class Disambiguation:
     neo4j_mgr = None
     lemmatizer = Lemmatizer()
-
-    def __init__(self):
+    ambiguity_level = 0.0
+    disambiguation_threshold = 0.0
+    def __init__(self, ambiguity_lvl = AMBIGUITY_LEVEL, disambiguation_threshold = DISAMBIGUATION_THRESHOLD):
         self.neo4j_mgr = Neo4jDisambiguation('neo4j')
+        self.ambiguity_level = ambiguity_lvl
+        self.disambiguation_threshold = disambiguation_threshold
 
     def get_words(self, text):
         words = re.split(r'\W+', text)
@@ -21,14 +24,14 @@ class Disambiguation:
             candidates = self.calculate_score(candidates)
             frequent_token = candidates.basic_form.value_counts()[:1].index.values[0]
             cand_set = candidates[candidates.basic_form == frequent_token]
-            if cand_set.shape[0] <= AMBIGUITY_LEVEL:
+            if cand_set.shape[0] <= self.ambiguity_level:
                 return candidates
             minimal_score = cand_set.score.min()
             candidates = candidates.drop(candidates[(candidates.score <= minimal_score) & (candidates.basic_form == frequent_token)].index)
         return candidates
 
     def filter_candidates(self, candidates):
-        return candidates.loc[candidates.score >= DISAMBIGUATION_THRESHOLD]
+        return candidates.loc[candidates.score >= self.disambiguation_threshold]
 
     def calculate_sum_score(self, cand_set, token_nmb):
         if cand_set.empty:

@@ -1,4 +1,5 @@
 from neo4j import GraphDatabase
+import re
 
 class Neo4jDisambiguation:
     URI = "neo4j://neo_dest:7687/"
@@ -11,11 +12,11 @@ class Neo4jDisambiguation:
         self.driver = GraphDatabase.driver(self.URI)
         self.session = self.driver.session(database = self.database_name)
 
-    def find_word_labels(self, word, lang_tag):
-        print(word + lang_tag)
-        if len(word) < 3:
+    def find_word_labels(self, word, lang):
+        print(word + lang)
+        if len(word) < 3 or re.match('-.*-', word):
             return []
-        if lang_tag == "polish":
+        if lang == "polish":
             result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + word + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
         else:
             result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_english CONTAINS '" + word + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")

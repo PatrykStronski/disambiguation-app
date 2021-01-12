@@ -7,8 +7,8 @@ import time
 class GraphDatabaseCreator:
     neo4j_mgr = None
     neo4j_new = None
-    db_dest_uri = "neo4j://neo_dest:7687"
-    db_src_uri = "neo4j://neo_src:7687"
+    db_dest_uri = "bolt://neo_dest"
+    db_src_uri = "bolt://neo_src"
     db_dest = "neo4j"
     db_src = "neo4j"
     max_depth = 0

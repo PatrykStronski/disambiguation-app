@@ -105,13 +105,13 @@ class InitialGraph:
         if self.should_restart():
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
-        self.time = time.time()
+        #self.time = time.time()
         relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri), columns = ["node2", "weight"])
         if self.iterations_level == 0:
             self.initial_node_properties["deg"] = relations.shape[0]
-        new_time = time.time()
-        print("Processing OF relations fetch:" + str(new_time - self.time))
-        self.time = new_time
+        #new_time = time.time()
+        #print("Processing OF relations fetch:" + str(new_time - self.time))
+        #self.time = new_time
         if relations.empty:
             if self.current_node_uri == self.initial_node_uri:
                 return
@@ -127,8 +127,8 @@ class InitialGraph:
         self.increment_visits(picked_relation)
         self.current_node_uri = picked_relation["node2"]
         self.iterations_level += 1
-        new_time = time.time()
-        print("Processing OF calculations PANDAS fetch:" + str(new_time - self.time))
+        #new_time = time.time()
+        #print("Processing OF calculations PANDAS fetch:" + str(new_time - self.time))
         return self.random_walk_with_restart()
 
     def get_graph(self):
