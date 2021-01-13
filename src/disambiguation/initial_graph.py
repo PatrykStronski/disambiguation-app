@@ -6,7 +6,7 @@ from config import SUPPORTED_LANGUAGES_SUFFIXES, SUPPORTED_LANGUAGES, LANGUAGE_A
 class InitialGraph:
     initial_node_uri = ""
     current_node_uri = ""
-    initial_node_properties = {}
+    node_properties = {}
     node_visit_counts = pd.DataFrame()
     max_iterations = 0
     depth = 0
@@ -18,11 +18,11 @@ class InitialGraph:
     lemmatizer = None
     princeton = "all"
 
-    def __init__(self, initial_node_uri, initial_node_properties, depth, threshold_visits, restart_probability, neo4j_src, neo4j_new, lemmatizer):
+    def __init__(self, initial_node_uri, node_properties, depth, threshold_visits, restart_probability, neo4j_src, neo4j_new, lemmatizer):
         self.lemmatizer = lemmatizer
         self.initial_node_uri = initial_node_uri
         self.current_node_uri = initial_node_uri
-        self.initial_node_properties = initial_node_properties
+        self.node_properties = self.prepare_language_labels(node_properties)
         self.max_iterations = depth
         self.threshold_visits = threshold_visits
         self.restart_probability = restart_probability
@@ -32,6 +32,11 @@ class InitialGraph:
         self.princeton = self.extract_princeton()
         self.create_lemmatized_labels()
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node2"])
+
+    def prepare_language_labels(self, node_properties):
+        for lang in SUPPORTED_LANGUAGES:
+            node_properties["labels_" + lang] = ""
+        return node_properties
 
     def has_language(self, label):
         for suffix in SUPPORTED_LANGUAGES_SUFFIXES:
@@ -53,28 +58,26 @@ class InitialGraph:
 
     def lemmatize_labels_old(self):
         labels = []
-        for prop in self.initial_node_properties.keys():
-            if "label" in prop.lower() and type(self.initial_node_properties[prop]) is list:
-                labels += self.lemmatizer.lemmatize_labels(self.filter_labels_lang(self.initial_node_properties[prop]))
+        for prop in self.node_properties.keys():
+            if "label" in prop.lower() and type(self.node_properties[prop]) is list:
+                labels += self.lemmatizer.lemmatize_labels(self.filter_labels_lang(self.node_properties[prop]))
         return labels
 
     def create_lemmatized_labels(self):
-        for prop in self.initial_node_properties.keys():
-            if "label" in prop.lower() and type(self.initial_node_properties[prop]) is list:
-                for label in self.initial_node_properties[prop]:
+        for prop in self.node_properties.keys():
+            if "label" in prop.lower() and type(self.node_properties[prop]) is list:
+                for label in self.node_properties[prop]:
                     language = self.detect_langauge(label)
                     if language:
-                        if self.initial_node_properties["labels_"+language]:
-                            self.initial_node_properties["labels_" + language] += self.lemmatizer.lemmatize(label, language, False)
-                        else:
-                            self.initial_node_properties["labels_" + language] = self.lemmatizer.lemmatize(label, language, False)
+                        if self.node_properties.get("labels_"+language):
+                            self.node_properties["labels_" + language] += self.lemmatizer.lemmatize(label, language, False)
         for lang in SUPPORTED_LANGUAGES:
-            if type(self.initial_node_properties.get("labels_" + lang)) is list:
-                self.initial_node_properties["labels_" + lang] = " ".join(set(self.initial_node_properties["labels_" + lang]))
+            if type(self.node_properties.get("labels_" + lang)) is list:
+                self.node_properties["labels_" + lang] = " ".join(set(self.node_properties["labels_" + lang]))
 
 
     def extract_princeton(self):
-        princeton = self.initial_node_properties.get("princeton")
+        princeton = self.node_properties.get("princeton")
         if princeton:
             return "TRUE"
         if self.initial_node_uri.startswith("http://dbpedia.org/resource/"):
@@ -110,7 +113,7 @@ class InitialGraph:
 
         relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri), columns = ["node2", "weight"])
         if self.iterations_level == 0:
-            self.initial_node_properties["deg"] = relations.shape[0]
+            self.node_properties["deg"] = relations.shape[0]
 
         #new_time = time.time()
         #print("Processing OF relations fetch:" + str(new_time - self.time))
@@ -143,7 +146,7 @@ class InitialGraph:
 
     def insert_graph(self):
         #self.time = time.time()
-        self.neo4j_new.create_node(self.initial_node_properties)
+        self.neo4j_new.create_node(self.node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
         self.neo4j_new.create_relation(self.initial_node_uri, strong_relations["node2"].values)
         #new_time = time.time()
