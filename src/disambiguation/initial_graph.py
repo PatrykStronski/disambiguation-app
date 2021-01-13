@@ -64,16 +64,18 @@ class InitialGraph:
         return labels
 
     def create_lemmatized_labels(self):
+        temporary_languages = {}
+        for lang in SUPPORTED_LANGUAGES:
+            temporary_languages[lang] = ""
         for prop in self.node_properties.keys():
             if "label" in prop.lower() and type(self.node_properties[prop]) is list:
                 for label in self.node_properties[prop]:
                     language = self.detect_langauge(label)
                     if language:
-                        if self.node_properties.get("labels_"+language):
-                            self.node_properties["labels_" + language] += self.lemmatizer.lemmatize(label, language, False)
+                        temporary_languages[language] += label[:-3].lower() + " "
         for lang in SUPPORTED_LANGUAGES:
-            if type(self.node_properties.get("labels_" + lang)) is list:
-                self.node_properties["labels_" + lang] = " ".join(set(self.node_properties["labels_" + lang]))
+            if temporary_languages[lang]:
+                self.node_properties["labels_" + lang] = " ".join(self.lemmatizer.lemmatize(temporary_languages[lang], lang, False))
 
 
     def extract_princeton(self):
