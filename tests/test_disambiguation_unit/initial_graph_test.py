@@ -126,3 +126,14 @@ def test_has_language_good():
     assert init_graph.has_language(label) == False
     label = "label 1@de"
     assert init_graph.has_language(label) == False
+
+def test_detect_langauge():
+    init_graph = InitialGraph("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
+    label = "label1@bg"
+    assert init_graph.detect_langauge(label) is None
+    label = "label 1@de"
+    assert init_graph.detect_langauge(label) is None
+    label = "label1@pl"
+    assert init_graph.detect_langauge(label) is "polish"
+    label = "label 1@en"
+    assert init_graph.detect_langauge(label) is "english"

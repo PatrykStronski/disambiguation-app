@@ -2,17 +2,18 @@ version: '3'
 
 services:
   neo_src:
-    image: neo4j:4.2.0
+    image: neo4j:4.1.1
     user: ${UID:-1000}:${GID:-1000}
     volumes:
       - ../storage/neo_src:/data
     environment:
       NEO4j_dbms.memory.pagecache.size: ${NEO_PAGESIZE}
       NEO4J_AUTH: ${NEOSRC_NEO4J_AUTH}
-    deploy:
-      resources:
-        limits:
-          memory: "${MAX_NEO_RAM}"
+      NEO4JLABS_PLUGINS: '["n10s"]'
+#    deploy:
+#      resources:
+#        limits:
+#          memory: "${MAX_NEO_RAM}"
 
   neo_dest:
     image: neo4j:4.2.0
