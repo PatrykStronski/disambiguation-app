@@ -20,8 +20,8 @@ class Disambiguation:
 
     def densest_subgraph(self, candidates):
         while True:
-            candidates = self.calculate_semantic_interconnections(candidates)
-            candidates = self.calculate_score(candidates)
+            #candidates = self.calculate_semantic_interconnections(candidates)
+            #candidates = self.calculate_score(candidates)
             frequent_token = candidates.basic_form.value_counts()[:1].index.values[0]
             cand_set = candidates[candidates.basic_form == frequent_token]
             if cand_set.shape[0] <= self.ambiguity_level:
@@ -71,26 +71,13 @@ class Disambiguation:
         semsign_children["semantic_interconnections"] += 1 + semsign_children["semantic_interconnections"]
         return cand
 
-    def count_interconnections_candidate_second(self, cand, candidates):
-        uri = cand["uri"]
-        uri_list = cand.sign
-        if not uri_list:
-            return cand
-        include_mask = candidates.uri.isin(uri_list)
-        include = candidates[include_mask]
-        deduplicated_include = include.sign.apply(lambda c: not self.contains_uri(uri, c))
-        include = include[deduplicated_include]
-        cand["semantic_interconnections"] = cand["semantic_interconnections"] + include.shape[0]
-        return cand
-
     def calculate_semantic_interconnections(self, candidates):
         candidates["semantic_interconnections"] = 0
-        candidates = candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
-        return candidates.apply(lambda cand: self.count_interconnections_candidate_second(cand, candidates), axis=1)
+        return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
 
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
         words = self.get_words(text)
-        tokens = list(filter(lambda word: word is not "-AGLT-", self.lemmatizer.lemmatize(" ".join(words), lang, True)))
+        tokens = list(filter(lambda word: word != "-AGLT-", self.lemmatizer.lemmatize(" ".join(words), lang, True)))
         candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_labels(token, lang) for token in tokens])
         print(candidates.shape)
         if candidates.empty:

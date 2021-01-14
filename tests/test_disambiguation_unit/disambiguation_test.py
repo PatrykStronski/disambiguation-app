@@ -9,7 +9,7 @@ def test_calculate_semantic_interconnections_simple():
     ])
     dis = Disambiguation(5,0.2)
     candidates = dis.calculate_semantic_interconnections(candidates)
-    assert candidates.iloc[0]["semantic_interconnections"] == 1
+    assert candidates.iloc[0]["semantic_interconnections"] == 0
     assert candidates.iloc[1]["semantic_interconnections"] == 1
     assert candidates.iloc[2]["semantic_interconnections"] == 0
 
@@ -37,7 +37,7 @@ def test_calculate_semantic_interconnections_bidirectional_more_complex():
     assert candidates.iloc[0]["semantic_interconnections"] == 1
     assert candidates.iloc[1]["semantic_interconnections"] == 2
     assert candidates.iloc[2]["semantic_interconnections"] == 0
-    assert candidates.iloc[3]["semantic_interconnections"] == 1
+    assert candidates.iloc[3]["semantic_interconnections"] == 0
 
 def test_calculate_semantic_interconnections_bidirectional_more_complex2():
     candidates = pd.DataFrame([
@@ -114,7 +114,9 @@ def test_densest_subgraph_simple():
         {"word": "w3", "basic_form": "w3", "uri": "http://a/w3.5", "sign": [],  "semantic_interconnections": 1, "deg": 15, "score": 0.0},
         {"word": "w3", "basic_form": "w3", "uri": "http://a/w3.6", "sign": [],  "semantic_interconnections": 3, "deg": 10, "score": 0.0}
     ])
-    dis = Disambiguation(5,0.2)
+    dis = Disambiguation(5, 0.4)
+    candidates = dis.calculate_semantic_interconnections(candidates)
+    candidates = dis.calculate_score(candidates)
     candidates = dis.densest_subgraph(candidates)
     assert candidates.shape[0] == 8
     assert candidates[candidates.basic_form == "w3"].shape[0] == 5
