@@ -1,4 +1,6 @@
 from neo4j import GraphDatabase
+import sys
+from config import PHRASE_SEPARATOR
 
 URI = "neo4j://neo_dest/"
 DB_NAME = "neo4j"
@@ -18,14 +20,16 @@ session = driver.session(database = DB_NAME)
 def transform_langtag(labels):
     ret = []
     for lab in labels:
-       ret += lab[:-3].split(" ")
+       ret.append(PHRASE_SEPARATOR + lab[:-3] + PHRASE_SEPARATOR)
     return " ".join(list(set(ret)))
 
-for node_ind in range(200000, 338597):
+start = sys.argv[1]
+end = sys.argv[2]
+for node_ind in range(start, end):
     if node_ind % 1000 == 0:
         print(node_ind)
-    node = [{"labels": rec["labels"], "uri": rec["uri"]} for rec in session.run('MATCH (n:Resource) RETURN n.uri AS uri, n.labels AS labels SKIP ' + str(node_ind) + ' LIMIT 1')][0]
-    labels = node["labels"]
+    node = [{"labels": rec["labels"], "uri": rec["uri"]} for rec in session.run('MATCH (n:Resource) RETURN n.uri AS uri, n.skos__prefLabel AS plabels, n.skos__altLabel AS alabels SKIP ' + str(node_ind) + ' LIMIT 1')][0]
+    labels = node["alabels"] + node["plabels"]
     if labels:
         lab_en = transform_langtag(filter(lambda lab: lab.endswith("@en"), labels))
         lab_pl = transform_langtag(filter(lambda lab: lab.endswith("@pl"), labels))

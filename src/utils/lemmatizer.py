@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import spacy
 import requests
 import copy
@@ -5,6 +6,7 @@ import time
 import ast
 import json
 import xmltodict
+from config import SLEEP_TIME_LEMMATIZER
 
 class Lemmatizer:
     nlp_en = None
@@ -25,7 +27,7 @@ class Lemmatizer:
     def check_if_lemmatized(self, task_id):
         retries_used = 0
         while retries_used < self.MAX_RETRIES:
-            time.sleep(0.2)
+            time.sleep(SLEEP_TIME_LEMMATIZER)
             retries_used += 1
             req = requests.get(self.URI_CHECKSTATUS + task_id)
             status = ast.literal_eval(req.text)
@@ -62,19 +64,26 @@ class Lemmatizer:
         return lemma
 
     def download_extract_lemmatization(self, download_id, should_mark):
-        lemmatized_xml = requests.get(self.URI_GETLEMMATIZED + download_id).text
-        if '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">' in lemmatized_xml:
+        lemmatized_req = requests.get(self.URI_GETLEMMATIZED + download_id)
+        if '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">' in lemmatized_req.text:
             print("retry 1 for lemmatization")
-            time.sleep(0.2)
-            lemmatized_xml = requests.get(self.URI_GETLEMMATIZED + download_id).text
-            if '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">' in lemmatized_xml:
+            time.sleep(SLEEP_TIME_LEMMATIZER)
+            lemmatized_req = requests.get(self.URI_GETLEMMATIZED + download_id)
+            if '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">' in lemmatized_req.text:
                 print("retry 2 for lemmatization")
-                time.sleep(0.2)
-                lemmatized_xml = requests.get(self.URI_GETLEMMATIZED + download_id).text
+                time.sleep(SLEEP_TIME_LEMMATIZER)
+                lemmatized_req = requests.get(self.URI_GETLEMMATIZED + download_id)
+        lemmatized_req.encoding = "utf-8"
+        lemmatized_xml = lemmatized_req.text
         lemmatization_data = json.loads(json.dumps(xmltodict.parse(lemmatized_xml)))
+        if type(lemmatization_data["chunkList"]["chunk"]["sentence"]) is list:
+            lemmatized = []
+            for sentence in lemmatization_data["chunkList"]["chunk"]["sentence"]:
+                lemmatized += [tok.get("lex").get("base") for tok in sentence["tok"]]
+            return lemmatized
         if type(lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]) is not list:
-            return [self.mark_unneeded_part_pl(lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"].get("lex"), should_mark)]
-        return [self.mark_unneeded_part_pl(tok.get("lex"), should_mark) for tok in lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]]
+            return [lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"].get("lex").get("base")]
+        return [tok.get("lex").get("base") for tok in lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]]
 
 
     def lemmatize_pl(self, text, should_mark = False):

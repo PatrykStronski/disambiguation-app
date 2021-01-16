@@ -140,15 +140,20 @@ def test_detect_langauge():
     
 def test_create_lemmatized_labels():
     init_graph = InitialGraph("ns", {"skos__prefLabel": ["Label@en", "metka@pl"], "skos__altLabel": ["znaczenie@pl", "meaning@en"]}, 0, 5, 0, None, None, lem)
-    assert init_graph.node_properties["labels_polish"] == "metka znaczenie"
-    assert init_graph.node_properties["labels_english"] == "label meaning"
+    assert init_graph.node_properties["labels_polish"] == "*metka**znaczenie*"
+    assert init_graph.node_properties["labels_english"] == "*label**meaning*"
 
 def test_create_lemmatized_labels_deu():
     init_graph = InitialGraph("ns", {"skos__prefLabel": ["Label@en", "metka@pl", "labell@de"], "skos__altLabel": ["znaczenie@pl"]}, 0, 5, 0, None, None, lem)
-    assert init_graph.node_properties["labels_polish"] == "metka znaczenie"
-    assert init_graph.node_properties["labels_english"] == "label"
+    assert init_graph.node_properties["labels_polish"] == "*metka**znaczenie*"
+    assert init_graph.node_properties["labels_english"] == "*label*"
 
 def test_create_lemmatized_labels_deu_ru():
     init_graph = InitialGraph("ns", {"skos__prefLabel": ["Label@en", "metka@pl", "labell@de"], "rdfs__label": ["znaczenie@pl"], "skos__altLabel": ["метка@ru"]}, 0, 5, 0, None, None, lem)
-    assert init_graph.node_properties["labels_polish"] == "metka znaczenie"
-    assert init_graph.node_properties["labels_english"] == "label"
+    assert init_graph.node_properties["labels_polish"] == "*metka**znaczenie*"
+    assert init_graph.node_properties["labels_english"] == "*label*"
+
+def test_create_lemmatized_labels_multiword():
+    init_graph = InitialGraph("ns", {"skos__prefLabel": ["labelled label@en", "ometkowana metka@pl", "labell@de"], "rdfs__label": ["znaczenie@pl"], "skos__altLabel": ["метка@ru"]}, 0, 5, 0, None, None, lem)
+    assert init_graph.node_properties["labels_polish"] == "*znaczenie**ometkować metka*"
+    assert init_graph.node_properties["labels_english"] == "*label label*"

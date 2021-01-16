@@ -63,19 +63,31 @@ class InitialGraph:
                 labels += self.lemmatizer.lemmatize_labels(self.filter_labels_lang(self.node_properties[prop]))
         return labels
 
+    def align_labels(self, labels):
+        joined = " ".join(labels)
+        return joined.replace(PHRASE_SEPARATOR+" ", PHRASE_SEPARATOR).replace(" "+PHRASE_SEPARATOR, PHRASE_SEPARATOR)
+
+
     def create_lemmatized_labels(self):
         temporary_languages = {}
         for lang in SUPPORTED_LANGUAGES:
             temporary_languages[lang] = ""
+            temporary_languages[lang+"_lemmatize"] = ""
         for prop in self.node_properties.keys():
             if "label" in prop.lower() and type(self.node_properties[prop]) is list:
                 for label in self.node_properties[prop]:
                     language = self.detect_langauge(label)
                     if language:
-                        temporary_languages[language] += label[:-3].lower() + " "
+                        if " " in label:
+                            temporary_languages[language+"_lemmatize"] += PHRASE_SEPARATOR + label[:-3].lower() + PHRASE_SEPARATOR
+                        else:
+                            temporary_languages[language] += PHRASE_SEPARATOR + label[:-3].lower() + PHRASE_SEPARATOR
         for lang in SUPPORTED_LANGUAGES:
+            self.node_properties["labels_" + lang] = ""
             if temporary_languages[lang]:
-                self.node_properties["labels_" + lang] = " ".join(self.lemmatizer.lemmatize(temporary_languages[lang], lang, False))
+                self.node_properties["labels_" + lang] += "".join(temporary_languages[lang])
+            if temporary_languages[lang+"_lemmatize"]:
+                self.node_properties["labels_" + lang] += self.align_labels(self.lemmatizer.lemmatize(temporary_languages[lang+"_lemmatize"], lang, False))
 
 
     def extract_princeton(self):

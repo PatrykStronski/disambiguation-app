@@ -1,4 +1,5 @@
 from neo4j import GraphDatabase
+from config import PHRASE_SEPARATOR
 import re
 
 class Neo4jDisambiguation:
@@ -17,7 +18,7 @@ class Neo4jDisambiguation:
         if len(word) < 3 or re.match('-.*-', word):
             return []
         if lang == "polish":
-            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + word + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
+            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + PHRASE_SEPARATOR + word + PHRASE_SEPARATOR + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
         else:
-            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_english CONTAINS '" + word + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
+            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_english CONTAINS '" + PHRASE_SEPARATOR + word + PHRASE_SEPARATOR + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
         return [{ "uri": record["uri"], "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result]

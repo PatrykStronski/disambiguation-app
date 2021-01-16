@@ -1,8 +1,7 @@
 from services.neo4j_disambiguation import Neo4jDisambiguation
-from utils.disambiguation import merge_into_dataframe
+from utils.mapper import merge_into_dataframe, filter_output
 from utils.lemmatizer import Lemmatizer
-from config import DISAMBIGUATION_THRESHOLD, AMBIGUITY_LEVEL
-import re
+from config import DISAMBIGUATION_THRESHOLD, AMBIGUITY_LEVEL, CANDIDATES_FIELDS
 
 class Disambiguation:
     neo4j_mgr = None
@@ -14,20 +13,14 @@ class Disambiguation:
         self.ambiguity_level = ambiguity_lvl
         self.disambiguation_threshold = disambiguation_threshold
 
-    def get_words(self, text):
-        words = re.split(r'\W+', text)
-        return list(filter(None, words))
-
     def densest_subgraph(self, candidates):
         while True:
-            #candidates = self.calculate_semantic_interconnections(candidates)
-            #candidates = self.calculate_score(candidates)
-            frequent_token = candidates.basic_form.value_counts()[:1].index.values[0]
-            cand_set = candidates[candidates.basic_form == frequent_token]
+            frequent_token = candidates.lemma.value_counts()[:1].index.values[0]
+            cand_set = candidates[candidates.lemma == frequent_token]
             if cand_set.shape[0] <= self.ambiguity_level:
                 return candidates
             minimal_score = cand_set.score.min()
-            candidates = candidates.drop(candidates[(candidates.score <= minimal_score) & (candidates.basic_form == frequent_token)].index)
+            candidates = candidates.drop(candidates[(candidates.score <= minimal_score) & (candidates.lemma == frequent_token)].index)
         return candidates
 
     def filter_candidates(self, candidates):
@@ -41,16 +34,16 @@ class Disambiguation:
     def calculate_entity_score(self, cand, sum_scores, token_number, token):
         deg = cand["deg"]
         sem_con = cand["semantic_interconnections"]
-        if cand["basic_form"] != token:
+        if cand["lemma"] != token:
             return cand
         cand.at["score"] = deg * sem_con / token_number / sum_scores
         return cand
 
     def calculate_score(self, candidates):
-        tokens = candidates["basic_form"].unique()
+        tokens = candidates["lemma"].unique()
         token_number = len(tokens) -1
         for token in tokens:
-            sum_scores = self.calculate_sum_score(candidates.loc[candidates.basic_form == token], token_number)
+            sum_scores = self.calculate_sum_score(candidates.loc[candidates.lemma == token], token_number)
             if sum_scores > 0:
                 candidates = candidates.apply(
                     lambda cand: self.calculate_entity_score(cand, sum_scores, token_number, token), axis=1)
@@ -61,12 +54,28 @@ class Disambiguation:
             return False
         return uri in semsign
 
+    def align_output(self, candidates, tokens):
+        out = []
+        ind = 0
+        for token in tokens:
+            candidates_token = candidates[candidates.lemma == token]
+            if candidates_token.empty:
+                empt = { key: "N#A" for key in CANDIDATES_FIELDS }
+                empt["lemma"] = token
+                empt["token_id"] = ind
+                out.append(empt)
+            else:
+                idx = candidates_token["score"].argmax()
+                out.append(candidates.iloc[idx].to_dict())
+            ind += 1
+        return out
+
     def count_interconnections_candidate(self, cand, candidates):
         uri = cand["uri"]
-        token = cand["basic_form"]
+        token = cand["lemma"]
         boolean_mask = candidates.sign.apply(lambda c: self.contains_uri(uri,c))
         semsign_children = candidates[boolean_mask]
-        semsign_children = semsign_children[semsign_children.basic_form != token]
+        semsign_children = semsign_children[semsign_children.lemma != token]
         cand.at["semantic_interconnections"] += semsign_children.shape[0]
         semsign_children["semantic_interconnections"] += 1 + semsign_children["semantic_interconnections"]
         return cand
@@ -75,10 +84,9 @@ class Disambiguation:
         candidates["semantic_interconnections"] = 0
         return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
 
-    def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
-        words = self.get_words(text)
-        tokens = list(filter(lambda word: word != "-AGLT-", self.lemmatizer.lemmatize(" ".join(words), lang, True)))
-        candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_labels(token, lang) for token in tokens])
+    def disambiguate_text(self, text, lang, is_test = False): #lang must be 'polish' or 'english'
+        tokens = self.lemmatizer.lemmatize(text, lang, False)
+        candidates = merge_into_dataframe(tokens, tokens, [self.neo4j_mgr.find_word_labels(token, lang) for token in tokens])
         print(candidates.shape)
         if candidates.empty:
             return { "data": [] }
@@ -86,6 +94,7 @@ class Disambiguation:
         candidates = self.calculate_score(candidates)
         candidates = self.filter_candidates(candidates)
         candidates = self.densest_subgraph(candidates)
+        proposed_candidates = self.align_output(candidates, tokens)
         return {
-            "data": candidates.to_dict("records")
+            "data": filter_output(proposed_candidates, is_test)
         }

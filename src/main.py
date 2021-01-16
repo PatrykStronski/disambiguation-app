@@ -13,4 +13,4 @@ elif len(sys.argv) > 1 and sys.argv[1] == "init-server":
     print("Start Flask server")
     create_app()
 else:
-    initiate_cli()
+    initiate_cli(sys.argv)
