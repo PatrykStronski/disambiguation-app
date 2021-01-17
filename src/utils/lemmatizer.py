@@ -27,12 +27,12 @@ class Lemmatizer:
     def check_if_lemmatized(self, task_id):
         retries_used = 0
         while retries_used < self.MAX_RETRIES:
-            time.sleep(SLEEP_TIME_LEMMATIZER)
             retries_used += 1
             req = requests.get(self.URI_CHECKSTATUS + task_id)
             status = ast.literal_eval(req.text)
             if status.get("status") == "DONE":
                 return status.get("value")[0].get("fileID")
+            time.sleep(SLEEP_TIME_LEMMATIZER)
         return False
 
     def mark_unneeded_part_pl(self, label, should_mark = False):
