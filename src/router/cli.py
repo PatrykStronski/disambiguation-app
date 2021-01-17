@@ -16,18 +16,19 @@ def warning(text):
     print(BCOLORS["WARNING"] + text + BCOLORS["ENDC"])
 
 def initiate_cli(args):
-    if len(args) == 4:
+    if len(args) >= 4:
         if args[1] == "conll_export":
             language = args[2]
             text = args[3]
+            file_name = args[4]
             if language not in SUPPORTED_LANGUAGES:
                 language = "english"
                 warning("default language is english")
             else:
                 debug("Disambiguating for " + language)
             disambiguated = Disamb.disambiguate_text(text, language, True)
-            to_tsv(disambiguated)
-        elif args[1] == "direct_export":
+            to_tsv(disambiguated, file_name)
+        elif args[1] == "inline":
             language = args[2]
             text = args[3]
             if language not in SUPPORTED_LANGUAGES:

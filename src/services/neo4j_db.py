@@ -44,8 +44,6 @@ class Neo4jDb:
     def compose_props(self, properties):
         props = []
         for prop in properties.keys():
-            if "__" in prop:
-                continue
             if type(properties[prop]) == str:
                 props.append('n.'+prop + '= "' + str(properties[prop]) + '"')
             else:

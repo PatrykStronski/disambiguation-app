@@ -43,13 +43,12 @@ services:
     build: ./docker/python
     volumes:
       - ./:/app
+      - ../resources_disambiguation:/data
     deploy:
       resources:
         limits:
           memory: "${MAX_APP_RAM}"
     environment:
-      - SSH_PRIVATEKEY
-      - SSH_PUBLICKEY
       - PM2_PROC_NUM
       - APP_MODE
 
