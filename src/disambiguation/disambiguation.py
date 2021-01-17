@@ -100,7 +100,7 @@ class Disambiguation:
         }
 
     def disambiguate_from_data(self, input_data, lang):  # lang must be 'polish' or 'english'
-        candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels(token, lang) for token in input_data["lemma"].values()])
+        candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels_weak(token, lang) for token in input_data["lemma"].tolist()])
         print(candidates.shape)
         if candidates.empty:
             return {"data": []}
@@ -108,7 +108,5 @@ class Disambiguation:
         candidates = self.calculate_score(candidates)
         candidates = self.filter_candidates(candidates)
         candidates = self.densest_subgraph(candidates)
-        proposed_candidates = self.align_output(candidates, tokens)
-        return {
-            "data": filter_output(proposed_candidates, True)
-        }
+        proposed_candidates = self.align_output(candidates, input_data["orth"].values)
+        return filter_output(proposed_candidates, True)

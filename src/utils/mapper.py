@@ -48,11 +48,32 @@ def merge_into_dataframe(words, tokens, candidate_sets):
     return candidates
 
 def extract_entries(entry_dict, candidate_set):
-    pass
+    rows = []
+    for cand in candidate_set:
+        rows.append({
+            "order_id": entry_dict.get("order_id"),
+            "token_id": entry_dict.get("token_id"),
+            "orth": entry_dict.get("orth"),
+            "lemma": entry_dict.get("lemma"),
+            "uri": cand["uri"],
+            "ctag": entry_dict.get("ctag"),
+            "wn_id": extract_wn_id(cand["uri"]),
+            "from": entry_dict.get("from"),
+            "to": entry_dict.get("to"),
+            "deg": cand["deg"],
+            "semantic_interconnections": 0,
+            "score": 0.0,
+            "sign": cand["sign"],
+            "labels": cand["labels"]
+        })
+    return rows
 
 def merge_with_data(data, candidate_sets):
     candidates = pd.DataFrame(columns=CANDIDATES_FIELDS)
-    for entry in data.iterrows():
-        entry_dict = entry.to_dict()
-        cands = extract_entries(entry_dict, candidate_sets)
-        candidates = candidates.append(cands, ignore_index=True)
+    sentence_len = len(candidate_sets)
+    for ind in range(0, sentence_len):
+        entry_dict = data.iloc[ind].to_dict()
+        cands = extract_entries(entry_dict, candidate_sets[ind])
+        if len(cands) > 0:
+            candidates = candidates.append(cands, ignore_index=True)
+    return candidates

@@ -55,10 +55,6 @@ class Neo4jDb:
         props = self.compose_props(properties)
         self.session.run('MERGE (n:Resource {uri: "' + properties['uri'] + '"}) SET ' + props)
 
-    def purge(self):
-        self.session.run('MATCH (n)-[r]-(b) DELETE r')
-        self.session.run('MATCH (n) DELETE n')
-
     def create_relation(self, node1_uri, node2_list):
         if len(node2_list) == 0:
             print('No semsigns in ' + node1_uri);

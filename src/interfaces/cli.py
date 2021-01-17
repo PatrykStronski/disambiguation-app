@@ -1,54 +1,47 @@
 from disambiguation.disambiguation import Disambiguation
-from utils.mapper import to_tsv
-from config import BCOLORS, SUPPORTED_LANGUAGES
+from config import SUPPORTED_LANGUAGES
+from utils.logger import Logger
+from utils.tsv_manager import read_input_data, create_output_file
 import pprint
 
-
 Disamb = Disambiguation()
-
-def debug(text):
-    print(BCOLORS["OKCYAN"] + text + BCOLORS["ENDC"])
-
-def successful(text):
-    print(BCOLORS["OKGREEN"] + text + BCOLORS["ENDC"])
-
-def warning(text):
-    print(BCOLORS["WARNING"] + text + BCOLORS["ENDC"])
+logger = Logger()
 
 def initiate_cli(args):
     if len(args) >= 4:
         if args[1] == "conll_export":
             language = args[2]
-            text = args[3]
-            file_name = args[4]
+            input_file = args[3]
+            output_file = args[4]
             if language not in SUPPORTED_LANGUAGES:
                 language = "english"
-                warning("default language is english")
+                logger.warning("default language is english")
             else:
-                debug("Disambiguating for " + language)
-            disambiguated = Disamb.disambiguate_text(text, language, True)
-            to_tsv(disambiguated, file_name)
+                logger.debug("Disambiguating for " + language)
+            input_data = read_input_data(input_file, "conll")
+            disambiguated = Disamb.disambiguate_from_data(input_data, language)
+            create_output_file(output_file, disambiguated, "conll")
         elif args[1] == "inline":
             language = args[2]
             text = args[3]
             if language not in SUPPORTED_LANGUAGES:
                 language = "english"
-                warning("default language is english")
+                logger.warning("default language is english")
             else:
-                debug("Disambiguating for " + language)
+                logger.debug("Disambiguating for " + language)
             pprint.pprint(Disamb.disambiguate_text(text, language))
     else:
-        debug("initiate endless CLI")
+        logger.debug("initiate endless CLI")
         initiate_infinite_cli()
 
 def initiate_infinite_cli():
     while True:
         lang = input("Insert language: polish or english: ").strip()
         if lang != "polish" and lang != "english":
-            print("default language - english")
+            logger.warning("default language - english")
             lang = "english"
         text = input("Provide text for disambiguation: ")
-        print("Your disambiguation is on the way...")
+        logger.debug("Your disambiguation is on the way...")
         pprint.pprint(Disamb.disambiguate_text(text, lang))
 
 def disambiguate_std(text, lang = "english"):

@@ -1,7 +1,7 @@
 import sys
 from disambiguation.graph_database_creator import GraphDatabaseCreator
-from router.index import create_app
-from router.cli import initiate_cli
+from interfaces.index import create_app
+from interfaces.cli import initiate_cli
 print("Application started")
 if len(sys.argv) > 1 and sys.argv[1] == "init-graph":
     print("Start sem signatures creation")
