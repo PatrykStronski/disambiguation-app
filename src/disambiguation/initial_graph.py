@@ -20,6 +20,7 @@ class InitialGraph:
 
     def __init__(self, initial_node_uri, node_properties, depth, threshold_visits, restart_probability, neo4j_src, neo4j_new, lemmatizer):
         self.lemmatizer = lemmatizer
+        self.polish_lemmatization_code = None
         self.initial_node_uri = initial_node_uri
         self.current_node_uri = initial_node_uri
         self.node_properties = self.prepare_language_labels(node_properties)
@@ -87,7 +88,10 @@ class InitialGraph:
             if temporary_languages[lang]:
                 self.node_properties["labels_" + lang] += "".join(temporary_languages[lang])
             if temporary_languages[lang+"_lemmatize"]:
-                self.node_properties["labels_" + lang] += self.align_labels(self.lemmatizer.lemmatize(temporary_languages[lang+"_lemmatize"], lang, False))
+                if lang != "polish":
+                    self.node_properties["labels_" + lang] += self.align_labels(self.lemmatizer.lemmatize(temporary_languages[lang+"_lemmatize"], lang, False))
+                else:
+                    self.polish_lemmatization_code = self.lemmatizer.lemmatizer_initiate_task(temporary_languages["polish_lemmatize"])
 
 
     def extract_princeton(self):
@@ -160,6 +164,8 @@ class InitialGraph:
 
     def insert_graph(self):
         #self.time = time.time()
+        if self.polish_lemmatization_code:
+            self.node_properties["labels_polish"] += self.align_labels(self.lemmatizer.download_lemmatization(self.polish_lemmatization_code, PHRASE_SEPARATOR))
         self.neo4j_new.create_node(self.node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
         self.neo4j_new.create_relation(self.initial_node_uri, strong_relations["node2"].values)

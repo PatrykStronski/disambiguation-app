@@ -85,15 +85,20 @@ class Lemmatizer:
             return [lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"].get("lex").get("base")]
         return [tok.get("lex").get("base") for tok in lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]]
 
-
-    def lemmatize_pl(self, text, should_mark = False):
-        body =  copy.deepcopy(self.BODY_STARTTASK)
+    def lemmatizer_initiate_task(self, text):
+        body = copy.deepcopy(self.BODY_STARTTASK)
         body["text"] = text
-        task_id = requests.post(self.URI_STARTTASK, data = json.dumps(body))
-        download_id = self.check_if_lemmatized(task_id.text)
+        return requests.post(self.URI_STARTTASK, data=json.dumps(body)).text
+
+    def download_lemmatization(self, task_id, text, should_mark = False):
+        download_id = self.check_if_lemmatized(task_id)
         if download_id is False:
             return text
         return self.download_extract_lemmatization(download_id, should_mark)
+
+    def lemmatize_pl(self, text, should_mark = False):
+        task_id = self.lemmatizer_initiate_task(text)
+        return self.download_lemmatization(task_id, text, should_mark)
 
     def lemmatize_en(self, text, mark_unneeded = False):
         doc = self.nlp_en(text)

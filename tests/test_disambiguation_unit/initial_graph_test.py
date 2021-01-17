@@ -155,5 +155,5 @@ def test_create_lemmatized_labels_deu_ru():
 
 def test_create_lemmatized_labels_multiword():
     init_graph = InitialGraph("ns", {"skos__prefLabel": ["labelled label@en", "ometkowana metka@pl", "labell@de"], "rdfs__label": ["znaczenie@pl"], "skos__altLabel": ["метка@ru"]}, 0, 5, 0, None, None, lem)
-    assert init_graph.node_properties["labels_polish"] == "*znaczenie**ometkować metka*"
+    assert init_graph.node_properties["labels_polish"] == "*znaczenie*"
     assert init_graph.node_properties["labels_english"] == "*label label*"

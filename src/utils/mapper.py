@@ -46,3 +46,13 @@ def merge_into_dataframe(words, tokens, candidate_sets):
             t_id += 1
         candidates = candidates.append(to_insert_set, ignore_index=True)
     return candidates
+
+def extract_entries(entry_dict, candidate_set):
+    pass
+
+def merge_with_data(data, candidate_sets):
+    candidates = pd.DataFrame(columns=CANDIDATES_FIELDS)
+    for entry in data.iterrows():
+        entry_dict = entry.to_dict()
+        cands = extract_entries(entry_dict, candidate_sets)
+        candidates = candidates.append(cands, ignore_index=True)

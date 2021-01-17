@@ -1,5 +1,5 @@
 from services.neo4j_disambiguation import Neo4jDisambiguation
-from utils.mapper import merge_into_dataframe, filter_output
+from utils.mapper import merge_into_dataframe, filter_output, merge_with_data
 from utils.lemmatizer import Lemmatizer
 from config import DISAMBIGUATION_THRESHOLD, AMBIGUITY_LEVEL, CANDIDATES_FIELDS
 
@@ -97,4 +97,18 @@ class Disambiguation:
         proposed_candidates = self.align_output(candidates, tokens)
         return {
             "data": filter_output(proposed_candidates, is_test)
+        }
+
+    def disambiguate_from_data(self, input_data, lang):  # lang must be 'polish' or 'english'
+        candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels(token, lang) for token in input_data["lemma"].values()])
+        print(candidates.shape)
+        if candidates.empty:
+            return {"data": []}
+        candidates = self.calculate_semantic_interconnections(candidates)
+        candidates = self.calculate_score(candidates)
+        candidates = self.filter_candidates(candidates)
+        candidates = self.densest_subgraph(candidates)
+        proposed_candidates = self.align_output(candidates, tokens)
+        return {
+            "data": filter_output(proposed_candidates, True)
         }
