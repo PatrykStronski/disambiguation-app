@@ -1,7 +1,8 @@
+from math import isnan
 from services.neo4j_disambiguation import Neo4jDisambiguation
 from utils.mapper import merge_into_dataframe, filter_output, merge_with_data
 from utils.lemmatizer import Lemmatizer
-from config import DISAMBIGUATION_THRESHOLD, AMBIGUITY_LEVEL, CANDIDATES_FIELDS
+from config import DISAMBIGUATION_THRESHOLD, AMBIGUITY_LEVEL, CANDIDATES_FIELDS, IS_WEAK
 
 class Disambiguation:
     neo4j_mgr = None
@@ -54,19 +55,24 @@ class Disambiguation:
             return False
         return uri in semsign
 
-    def align_output(self, candidates, tokens):
+    def check_value(self, val):
+        if type(val) == float and isnan(val):
+            return "_"
+        return val
+
+    def align_output(self, candidates, input_data):
         out = []
-        ind = 0
-        for token in tokens:
-            candidates_token = candidates[candidates.lemma == token]
+        for ind, input_row in input_data.iterrows():
+            token = input_row["lemma"]
+            candidates_token = candidates.loc[candidates.lemma == token]
             if candidates_token.empty:
-                empt = { key: "N#A" for key in CANDIDATES_FIELDS }
+                empt = { key: self.check_value(input_row.get(key)) for key in CANDIDATES_FIELDS }
                 empt["lemma"] = token
                 empt["token_id"] = ind
                 out.append(empt)
             else:
                 idx = candidates_token["score"].argmax()
-                out.append(candidates.iloc[idx].to_dict())
+                out.append(candidates_token.iloc[idx].to_dict())
             ind += 1
         return out
 
@@ -100,7 +106,11 @@ class Disambiguation:
         }
 
     def disambiguate_from_data(self, input_data, lang):  # lang must be 'polish' or 'english'
-        candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels_weak(token, lang) for token in input_data["lemma"].tolist()])
+        candidates = None
+        if IS_WEAK:
+            candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels_weak(token, lang) for token in input_data["lemma"].tolist()])
+        else:
+            candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels(token, lang) for token in input_data["lemma"].tolist()])
         print(candidates.shape)
         if candidates.empty:
             return {"data": []}
@@ -108,5 +118,5 @@ class Disambiguation:
         candidates = self.calculate_score(candidates)
         candidates = self.filter_candidates(candidates)
         candidates = self.densest_subgraph(candidates)
-        proposed_candidates = self.align_output(candidates, input_data["orth"].values)
+        proposed_candidates = self.align_output(candidates, input_data)
         return filter_output(proposed_candidates, True)

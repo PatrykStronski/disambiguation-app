@@ -19,6 +19,7 @@ EXPORTED_FIELDS = ["order_id", "token_id", "orth", "lemma", "uri", "score", "lab
 POLEVAL_EXPORTED_FIELDS = ["order_id", "token_id", "orth", "lemma", "ctag", "from", "to", "wn_id"]
 POLEVAL_EXPORTED_FIELDS_UP = ["ORDER_ID", "TOKEN_ID", "ORTH", "LEMMA", "CTAG", "FROM", "TO", "WN_ID"]
 EXPORT_DIR = "/data/"
+IS_WEAK = False
 
 CONLL_DELIMITER = "\t"
 
