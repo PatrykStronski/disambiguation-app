@@ -16,6 +16,9 @@ class Disambiguation:
 
     def densest_subgraph(self, candidates):
         while True:
+            candidates = self.calculate_semantic_interconnections(candidates)
+            candidates = self.calculate_score(candidates)
+            print(candidates)
             frequent_token = candidates.lemma.value_counts()[:1].index.values[0]
             cand_set = candidates[candidates.lemma == frequent_token]
             if cand_set.shape[0] <= self.ambiguity_level:
@@ -90,7 +93,7 @@ class Disambiguation:
         candidates["semantic_interconnections"] = 0
         return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
 
-    def disambiguate_text(self, text, lang, is_test = False): #lang must be 'polish' or 'english'
+    def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
         tokens = self.lemmatizer.lemmatize(text, lang, False)
         candidates = merge_into_dataframe(tokens, tokens, [self.neo4j_mgr.find_word_labels(token, lang) for token in tokens])
         print(candidates.shape)
@@ -98,11 +101,11 @@ class Disambiguation:
             return { "data": [] }
         candidates = self.calculate_semantic_interconnections(candidates)
         candidates = self.calculate_score(candidates)
-        candidates = self.filter_candidates(candidates)
         candidates = self.densest_subgraph(candidates)
+        candidates = self.filter_candidates(candidates)
         proposed_candidates = self.align_output(candidates, tokens)
         return {
-            "data": filter_output(proposed_candidates, is_test)
+            "data": filter_output(proposed_candidates, False)
         }
 
     def disambiguate_from_data(self, input_data, lang):  # lang must be 'polish' or 'english'
@@ -114,9 +117,7 @@ class Disambiguation:
         print(candidates.shape)
         if candidates.empty:
             return {"data": []}
-        candidates = self.calculate_semantic_interconnections(candidates)
-        candidates = self.calculate_score(candidates)
-        candidates = self.filter_candidates(candidates)
         candidates = self.densest_subgraph(candidates)
+        candidates = self.filter_candidates(candidates)
         proposed_candidates = self.align_output(candidates, input_data)
         return filter_output(proposed_candidates, True)

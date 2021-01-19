@@ -45,8 +45,7 @@ def initiate_infinite_cli():
         pprint.pprint(Disamb.disambiguate_text(text, lang))
 
 def disambiguate_std(text, lang = "english"):
-        pprint.pprint(Disamb.disambiguate_text(text, lang, True))
+        pprint.pprint(Disamb.disambiguate_text(text, lang))
 
 def disambiguate_std_file(text, lang="english", file = "out.conll"):
-    disambiguated = Disamb.disambiguate_text(text, lang, True)
-    to_tsv(disambiguated)
+    disambiguated = Disamb.disambiguate_text(text, lange)
