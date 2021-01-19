@@ -3,7 +3,7 @@ import pandas as pd
 import time
 from config import SUPPORTED_LANGUAGES_SUFFIXES, SUPPORTED_LANGUAGES, LANGUAGE_ALIAS, PHRASE_SEPARATOR
 
-class InitialGraph:
+class RandomWalk:
     initial_node_uri = ""
     current_node_uri = ""
     node_properties = {}

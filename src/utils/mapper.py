@@ -1,9 +1,6 @@
 import pandas as pd
 from config import CANDIDATES_FIELDS, POLEVAL_EXPORTED_FIELDS, EXPORTED_FIELDS
 
-def to_tsv(disambiguated):
-    pass
-
 def filter_output(data, is_test = False):
     if is_test:
         return [{ key: row[key] for key in POLEVAL_EXPORTED_FIELDS } for row in data]

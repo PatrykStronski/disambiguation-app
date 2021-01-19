@@ -1,4 +1,4 @@
-from disambiguation.initial_graph import InitialGraph
+from disambiguation.random_walk import RandomWalk
 from services.neo4j_db import Neo4jDb
 from services.redis_checker import RedisChecker
 from utils.lemmatizer import Lemmatizer
@@ -45,7 +45,7 @@ class GraphDatabaseCreator:
             if is_processed == "DONE":
                 print("The node has already been processed. Carrying on...")
                 continue
-            init_graph = InitialGraph(node_uri, node_properties, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new, self.lemmatizer)
+            init_graph = RandomWalk(node_uri, node_properties, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new, self.lemmatizer)
             init_graph.random_walk_with_restart()
             self.redis_checker.insert_processed_id(node_uri)
             if node_index % 100 == 0:
