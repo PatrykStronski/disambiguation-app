@@ -35,35 +35,12 @@ class Lemmatizer:
             time.sleep(SLEEP_TIME_LEMMATIZER)
         return False
 
-    def mark_unneeded_part_pl(self, label, should_mark = False):
-        base = label.get("base")
-        if not should_mark:
-            return base
-        ctag = label.get("ctag")
-        if ctag and ctag.startswith("prep:"):
-            return "-PREP-"
-        elif ctag and ctag == "interp":
-            return "-INTERP-"
-        elif ctag and ctag.startswith("ppron"):
-            return "-PPRON-"
-        elif ctag and ctag.startswith("aglt"):
-            return "-AGLT-"
-        elif ctag and ctag.startswith("conj"):
-            return "-CONJ-"
-        elif ctag and ctag.startswith("conj"):
-            return "-CONJ-"
-        elif ctag and ctag.startswith("comp"):
-            return "-COMP-"
-        elif ctag and ctag.startswith("qub"):
-            return "-QUB-"
-        return base
-
     def mark_unneeded_part_en(self, lemma, pos):
         if pos == "ADP" or pos == "DET":
             return "-"+pos+"-"
         return lemma
 
-    def download_extract_lemmatization(self, download_id, should_mark):
+    def download_extract_lemmatization(self, download_id):
         lemmatized_req = requests.get(self.URI_GETLEMMATIZED + download_id)
         if '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">' in lemmatized_req.text:
             print("retry 1 for lemmatization")
@@ -78,38 +55,45 @@ class Lemmatizer:
         lemmatization_data = json.loads(json.dumps(xmltodict.parse(lemmatized_xml)))
         if type(lemmatization_data["chunkList"]["chunk"]["sentence"]) is list:
             lemmatized = []
+            orths = []
             for sentence in lemmatization_data["chunkList"]["chunk"]["sentence"]:
                 lemmatized += [tok.get("lex").get("base") for tok in sentence["tok"]]
-            return lemmatized
+                orths += [tok.get("orth") for tok in sentence["tok"]]
+            return lemmatized, orths
         if type(lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]) is not list:
-            return [lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"].get("lex").get("base")]
-        return [tok.get("lex").get("base") for tok in lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]]
+            return [lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"].get("lex").get("base")], [lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"].get("orth")]
+        return [tok.get("lex").get("base") for tok in lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]], [tok.get("orth") for tok in lemmatization_data["chunkList"]["chunk"]["sentence"]["tok"]]
 
     def lemmatizer_initiate_task(self, text):
         body = copy.deepcopy(self.BODY_STARTTASK)
         body["text"] = text
         return requests.post(self.URI_STARTTASK, data=json.dumps(body)).text
 
-    def download_lemmatization(self, task_id, text, should_mark = False):
+    def download_lemmatization(self, task_id, text):
         download_id = self.check_if_lemmatized(task_id)
         if download_id is False:
             return text
-        return self.download_extract_lemmatization(download_id, should_mark)
+        return self.download_extract_lemmatization(download_id)
 
-    def lemmatize_pl(self, text, should_mark = False):
+    def lemmatize_pl(self, text):
         task_id = self.lemmatizer_initiate_task(text)
-        return self.download_lemmatization(task_id, text, should_mark)
+        return self.download_lemmatization(task_id, text)
 
     def lemmatize_en(self, text, mark_unneeded = False):
         doc = self.nlp_en(text)
         if not mark_unneeded:
-            return [token.lemma_ for token in doc]
-        return [self.mark_unneeded_part_en(token.lemma_, token.pos_) for token in doc]
+            return [token.lemma_ for token in doc], [token.text for token in doc]
+        return [self.mark_unneeded_part_en(token.lemma_, token.pos_) for token in doc], [token.text for token in doc]
 
     def lemmatize(self, text, language, mark_unneeded = False):
         if language == "polish":
-            return self.lemmatize_pl(text, mark_unneeded)
-        return self.lemmatize_en(text, mark_unneeded)
+            return self.lemmatize_pl(text)[0]
+        return self.lemmatize_en(text, mark_unneeded)[0]
+
+    def lemmatize_orth(self, text, language):
+        if language == "polish":
+            return self.lemmatize_pl(text)
+        return self.lemmatize_en(text, False)
 
     def lemmatize_detect_language(self, word):
         """ This method can only be used  by initial graph"""

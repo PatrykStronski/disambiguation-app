@@ -39,30 +39,11 @@ class RandomWalk:
             node_properties["labels_" + lang] = ""
         return node_properties
 
-    def has_language(self, label):
-        for suffix in SUPPORTED_LANGUAGES_SUFFIXES:
-            if label.endswith(suffix):
-                return True
-        return False
-
-    def filter_labels_supported_lang(self, labels):
-        return list(filter(self.has_language, labels))
-
-    def filter_labels_lang(self, labels, lang):
-        return list(filter(lambda label: label.endswith(LANGUAGE_ALIAS[lang]), labels))
-
     def detect_langauge(self, label):
         for lang in SUPPORTED_LANGUAGES:
             if label.endswith(LANGUAGE_ALIAS[lang]):
                 return lang
         return None
-
-    def lemmatize_labels_old(self):
-        labels = []
-        for prop in self.node_properties.keys():
-            if "label" in prop.lower() and type(self.node_properties[prop]) is list:
-                labels += self.lemmatizer.lemmatize_labels(self.filter_labels_lang(self.node_properties[prop]))
-        return labels
 
     def align_labels(self, labels):
         joined = " ".join(labels)
@@ -165,7 +146,7 @@ class RandomWalk:
     def insert_graph(self):
         #self.time = time.time()
         if self.polish_lemmatization_code:
-            self.node_properties["labels_polish"] += self.align_labels(self.lemmatizer.download_lemmatization(self.polish_lemmatization_code, PHRASE_SEPARATOR))
+            self.node_properties["labels_polish"] += self.align_labels(self.lemmatizer.download_lemmatization(self.polish_lemmatization_code, PHRASE_SEPARATOR)[0])
         self.neo4j_new.create_node(self.node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
         self.neo4j_new.create_relation(self.initial_node_uri, strong_relations["node2"].values)

@@ -1,10 +1,10 @@
 import pandas as pd
 from config import CANDIDATES_FIELDS, POLEVAL_EXPORTED_FIELDS, EXPORTED_FIELDS
 
-def filter_output(data, is_test = False):
-    if is_test:
-        return [{ key: row[key] for key in POLEVAL_EXPORTED_FIELDS } for row in data]
-    return [{ key: row[key] for key in EXPORTED_FIELDS } for row in data]
+def filter_output(data, is_poleval = False):
+    if is_poleval:
+        return [{ key: row.get(key) for key in POLEVAL_EXPORTED_FIELDS } for row in data]
+    return [{ key: row.get(key) for key in EXPORTED_FIELDS } for row in data]
 
 def extract_wn_id(uri):
     return "s"+str(uri.split('/')[-1])

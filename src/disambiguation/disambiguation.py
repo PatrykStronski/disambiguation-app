@@ -18,7 +18,6 @@ class Disambiguation:
         while True:
             candidates = self.calculate_semantic_interconnections(candidates)
             candidates = self.calculate_score(candidates)
-            print(candidates)
             frequent_token = candidates.lemma.value_counts()[:1].index.values[0]
             cand_set = candidates[candidates.lemma == frequent_token]
             if cand_set.shape[0] <= self.ambiguity_level:
@@ -79,6 +78,19 @@ class Disambiguation:
             ind += 1
         return out
 
+    def align_output_tokens(self, candidates, tokens, words):
+        out = []
+        for ind in range(0, len(tokens)):
+            token = tokens[ind]
+            candidates_token = candidates.loc[candidates.lemma == token]
+            if candidates_token.empty:
+                out.append({ "lemma": token, "orth": words[ind], "token_id": ind})
+            else:
+                idx = candidates_token["score"].argmax()
+                chosen = candidates_token.iloc[idx].to_dict()
+                out.append({ "lemma": token, "orth": words[ind], "token_id": ind, "uri": chosen["uri"], "labels": chosen["labels"], "score": chosen["score"]})
+        return out
+
     def count_interconnections_candidate(self, cand, candidates):
         uri = cand["uri"]
         token = cand["lemma"]
@@ -94,8 +106,10 @@ class Disambiguation:
         return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
 
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
-        tokens = self.lemmatizer.lemmatize(text, lang, False)
-        candidates = merge_into_dataframe(tokens, tokens, [self.neo4j_mgr.find_word_labels(token, lang) for token in tokens])
+        lemmatization_data = self.lemmatizer.lemmatize_orth(text, lang)
+        tokens = lemmatization_data[0]
+        words = lemmatization_data[1]
+        candidates = merge_into_dataframe(words, tokens, [self.neo4j_mgr.find_word_labels(token, lang) for token in tokens])
         print(candidates.shape)
         if candidates.empty:
             return { "data": [] }
@@ -103,13 +117,12 @@ class Disambiguation:
         candidates = self.calculate_score(candidates)
         candidates = self.densest_subgraph(candidates)
         candidates = self.filter_candidates(candidates)
-        proposed_candidates = self.align_output(candidates, tokens)
+        proposed_candidates = self.align_output_tokens(candidates, tokens, words)
         return {
             "data": filter_output(proposed_candidates, False)
         }
 
     def disambiguate_from_data(self, input_data, lang):  # lang must be 'polish' or 'english'
-        candidates = None
         if IS_WEAK:
             candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels_weak(token, lang) for token in input_data["lemma"].tolist()])
         else:

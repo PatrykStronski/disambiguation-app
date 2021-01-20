@@ -1,23 +1,7 @@
 import pandas as pd
 from disambiguation.random_walk import RandomWalk
 from utils.lemmatizer import Lemmatizer
-#def test_extract_language_en():
-#    init_graph = RandomWalk("http://dummyurl", { "skos__prefLabel": ["Label@en", "Label1@en"]}, 0, 0, 0, None, None)
-#    assert init_graph.extract_language() == "@en"
-#    init_graph = RandomWalk("http://dummyurl", { "skos__prefLabel": "Label@en"}, 0, 0, 0, None, None)
-#    assert init_graph.extract_language() == "@en"
 
-#def test_extract_language_pl():
-#    init_graph = RandomWalk("http://dummyurl", { "skos__prefLabel": ["Label@pl"]}, 0, 0, 0, None, None)
-#    assert init_graph.extract_language() == "@pl"
-#    init_graph = RandomWalk("http://dummyurl", { "skos__prefLabel": "Label@pl"}, 0, 0, 0, None, None)
-#    assert init_graph.extract_language() == "@pl"
-
-#def test_extract_language_all():
-#    init_graph = RandomWalk("http://dummyurl", { "skos__prefLabel": ["Label@pl", "Label@en"]}, 0, 0, 0, None, None)
-#    assert init_graph.extract_language() == "all"
-#    init_graph = RandomWalk("http://dummyurl", { }, 0, 0, 0, None, None)
-#    assert init_graph.extract_language() == "all"
 lem = Lemmatizer()
 
 def test_should_restart():
@@ -95,37 +79,6 @@ def test_increment_visits_different_entry():
     init_graph.increment_visits(picked_relation)
     assert init_graph.node_visit_counts.shape == (1,5)
     assert { "count": 2, "journey_length": 1.0, "relation": "rel4", "node1": "nOld", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
-
-def test_filter_labels_supported_lang():
-    init_graph = RandomWalk("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
-    labels = ["label1@pl", "label2@bg", "label3@en"]
-    labels_filtered = init_graph.filter_labels_supported_lang(labels)
-    assert len(labels_filtered) == 2
-    assert labels_filtered[0] == "label1@pl"
-    assert labels_filtered[1] == "label3@en"
-
-def test_filter_labels_supported_lang_all_good():
-    init_graph = RandomWalk("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
-    labels = ["label1@pl", "label2@pl", "label3@en"]
-    labels_filtered = init_graph.filter_labels_supported_lang(labels)
-    assert len(labels_filtered) == 3
-    assert labels_filtered[0] == "label1@pl"
-    assert labels_filtered[1] == "label2@pl"
-    assert labels_filtered[2] == "label3@en"
-
-def test_has_language_good():
-    init_graph = RandomWalk("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
-    label = "label1@pl"
-    assert init_graph.has_language(label) == True
-    label = "label 1@pl"
-    assert init_graph.has_language(label) == True
-
-def test_has_language_good():
-    init_graph = RandomWalk("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
-    label = "label1@bg"
-    assert init_graph.has_language(label) == False
-    label = "label 1@de"
-    assert init_graph.has_language(label) == False
 
 def test_detect_langauge():
     init_graph = RandomWalk("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
