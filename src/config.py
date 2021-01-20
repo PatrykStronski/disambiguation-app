@@ -12,7 +12,7 @@ SLEEP_TIME_LEMMATIZER = 0.2
 
 ###DISAMBIGUATION
 
-DISAMBIGUATION_THRESHOLD = 0.1
+DISAMBIGUATION_THRESHOLD = 0.2
 AMBIGUITY_LEVEL = 10
 CANDIDATES_FIELDS = ["order_id", "token_id", "orth", "lemma", "uri", "ctag", "from", "to", "wn_id", "deg", "semantic_interconnections", "score", "sign", "labels"]
 EXPORTED_FIELDS = ["token_id", "orth", "lemma", "uri", "score", "labels"]

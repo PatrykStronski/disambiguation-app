@@ -37,7 +37,7 @@ def create_output_file(filename, data, format):
         dict_wrt.writeheader()
         for row in data:
             dict_wrt.writerow({ key.upper(): row[key] for key in row.keys()})
-        logger.successful("Output saved to " + EXPORT_DIR + filename + " file! :)")
+        logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
         return None
 
     logger.error("Format " + format + " not understood. Exiting")
