@@ -62,6 +62,11 @@ class Disambiguation:
             return "_"
         return val
 
+    def check_value_none(self, val):
+        if not val:
+            return "_"
+        return val
+
     def align_output(self, candidates, input_data):
         out = []
         for ind, input_row in input_data.iterrows():
@@ -88,7 +93,8 @@ class Disambiguation:
             else:
                 idx = candidates_token["score"].argmax()
                 chosen = candidates_token.iloc[idx].to_dict()
-                out.append({ "lemma": token, "orth": words[ind], "token_id": ind, "uri": chosen["uri"], "labels": chosen["labels"], "score": chosen["score"]})
+                out.append({ "lemma": token, "orth": words[ind], "token_id": ind, "uri": self.check_value_none(chosen["uri"]),
+                             "labels": self.check_value_none(chosen["labels"]), "score": self.check_value_none(chosen["score"])})
         return out
 
     def count_interconnections_candidate(self, cand, candidates):
