@@ -5,6 +5,20 @@ from config import CANDIDATES_FIELDS, CONLL_DELIMITER, POLEVAL_EXPORTED_FIELDS_U
 
 logger = Logger()
 
+def write_conll(new_file, data, filename):
+    dict_wrt = csv.DictWriter(new_file, POLEVAL_EXPORTED_FIELDS_UP, delimiter=CONLL_DELIMITER)
+    dict_wrt.writeheader()
+    for row in data:
+        dict_wrt.writerow({key.upper(): row[key] for key in row.keys()})
+    logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
+
+def write_semeval_tsv(new_file, data, filename):
+    dict_wrt = csv.DictWriter(new_file, ["from", "to", "wnid"], delimiter=CONLL_DELIMITER)
+    for sentence in data:
+        for row in sentence:
+            dict_wrt.writerow({ "from": row["order_id"], "to": row["order_id"], "wnid": row["wn_id"] })
+    logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
+
 def read_input_data(filename, format):
     """ parses data from files based on format and returns a DATAFRAME"""
     if not filename:
@@ -33,11 +47,10 @@ def create_output_file(filename, data, format):
     new_file = open(EXPORT_DIR + filename, "w", newline="")
 
     if format == "conll":
-        dict_wrt = csv.DictWriter(new_file, POLEVAL_EXPORTED_FIELDS_UP, delimiter=CONLL_DELIMITER)
-        dict_wrt.writeheader()
-        for row in data:
-            dict_wrt.writerow({ key.upper(): row[key] for key in row.keys()})
-        logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
+        write_conll(new_file, data, filename)
+        return None
+    elif format == "semeval-tsv":
+        write_semeval_tsv(new_file, data, filename)
         return None
 
     logger.error("Format " + format + " not understood. Exiting")

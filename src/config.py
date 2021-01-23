@@ -12,8 +12,8 @@ SLEEP_TIME_LEMMATIZER = 0.2
 
 ###DISAMBIGUATION
 
-DISAMBIGUATION_THRESHOLD = 0.2
-AMBIGUITY_LEVEL = 10
+DISAMBIGUATION_THRESHOLD = 0.01
+AMBIGUITY_LEVEL = 20
 CANDIDATES_FIELDS = ["order_id", "token_id", "orth", "lemma", "uri", "ctag", "from", "to", "wn_id", "deg", "semantic_interconnections", "score", "sign", "labels"]
 EXPORTED_FIELDS = ["token_id", "orth", "lemma", "uri", "score", "labels"]
 POLEVAL_EXPORTED_FIELDS = ["order_id", "token_id", "orth", "lemma", "ctag", "from", "to", "wn_id"]
@@ -21,9 +21,16 @@ POLEVAL_EXPORTED_FIELDS_UP = ["ORDER_ID", "TOKEN_ID", "ORTH", "LEMMA", "CTAG", "
 EXPORT_DIR = "/data/"
 IS_WEAK = False
 
+SEMEVAL_MAPPING = {
+    "@id": "token_id",
+    "@id": "order_id",
+    "@lemma": "lemma",
+    "@pos": "ctag",
+    "#text": "orth"
+}
+
 CONLL_DELIMITER = "\t"
 
-###COLORS
 BCOLORS = {
     "HEADER": '\033[95m',
     "OKBLUE": '\033[94m',
