@@ -24,7 +24,6 @@ class Disambiguation:
                 return candidates
             minimal_score = cand_set.score.min()
             candidates = candidates.drop(candidates[(candidates.score <= minimal_score) & (candidates.lemma == frequent_token)].index)
-        return candidates
 
     def filter_candidates(self, candidates):
         return candidates.loc[candidates.score >= self.disambiguation_threshold]
@@ -58,16 +57,6 @@ class Disambiguation:
         sum_scores = self.calculate_sum_score(candidates.loc[candidates.lemma == lemma], token_number)
         if sum_scores > 0:
             candidates = candidates.apply(lambda cand: self.calculate_entity_score(cand, sum_scores, token_number, lemma), axis=1)
-        return candidates
-
-    def calculate_score(self, candidates):
-        tokens = candidates["lemma"].unique()
-        token_number = len(tokens) -1
-        for token in tokens:
-            sum_scores = self.calculate_sum_score(candidates.loc[candidates.lemma == token], token_number)
-            if sum_scores > 0:
-                candidates = candidates.apply(
-                    lambda cand: self.calculate_entity_score(cand, sum_scores, token_number, token), axis=1)
         return candidates
 
     def contains_uri(self, uri, semsign):
@@ -116,21 +105,31 @@ class Disambiguation:
         return out
 
     def count_interconnections_candidate(self, cand, candidates):
+        """ This function aims on calculating semantic connections"""
         uri = cand["uri"]
         token = cand["lemma"]
-        boolean_mask = candidates.sign.apply(lambda c: self.contains_uri(uri,c))
-        semsign_children = candidates[boolean_mask]
-        semsign_children = semsign_children[semsign_children.lemma != token]
-        cand.at["semantic_interconnections"] += semsign_children.shape[0]
-        semsign_children["semantic_interconnections"] += 1 + semsign_children["semantic_interconnections"]
+        semsign = cand["sign"]
+        candidates_different = candidates.loc[candidates.lemma != token]
+        #calculate v' IN SemSign(v)
+        boolean_mask = candidates_different.uri.apply(lambda c_uri: self.contains_uri(c_uri, semsign))
+        connections_nmb_relates = candidates_different[boolean_mask].shape[0]
+        cand.at["semantic_interconnections"] = connections_nmb_relates
+        #calculate v IN SemSign(v')
+        boolean_mask = candidates_different.sign.apply(lambda c: self.contains_uri(uri, c))
+        connections_nmb_is_related = candidates_different[boolean_mask].shape[0]
+        cand.at["semantic_in_connections"] = connections_nmb_is_related
+        cand.at["deg"] = connections_nmb_is_related + connections_nmb_relates
         return cand
 
     def calculate_semantic_interconnections(self, candidates):
         candidates["semantic_interconnections"] = 0
+        candidates["semantic_in_connections"] = 0
         return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
 
     def calculate_semantic_interconnections_lemma(self, candidates, lemma):
         candidates["semantic_interconnections"] = 0
+        candidates["semantic_in_connections"] = 0
+        candidates["deg"] = 0
         return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates) if cand["lemma"] == lemma else cand, axis=1)
 
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
