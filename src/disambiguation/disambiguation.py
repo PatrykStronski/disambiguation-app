@@ -16,9 +16,9 @@ class Disambiguation:
 
     def densest_subgraph(self, candidates):
         while True:
-            candidates = self.calculate_semantic_interconnections(candidates)
-            candidates = self.calculate_score(candidates)
             frequent_token = candidates.lemma.value_counts()[:1].index.values[0]
+            candidates = self.calculate_semantic_interconnections_lemma(candidates, frequent_token)
+            candidates = self.calculate_score_lemma(candidates, frequent_token)
             cand_set = candidates[candidates.lemma == frequent_token]
             if cand_set.shape[0] <= self.ambiguity_level:
                 return candidates
@@ -41,6 +41,24 @@ class Disambiguation:
             return cand
         cand.at["score"] = deg * sem_con / token_number / sum_scores
         return cand
+
+    def calculate_score(self, candidates):
+        tokens = candidates["lemma"].unique()
+        token_number = len(tokens) -1
+        for token in tokens:
+            sum_scores = self.calculate_sum_score(candidates.loc[candidates.lemma == token], token_number)
+            if sum_scores > 0:
+                candidates = candidates.apply(
+                    lambda cand: self.calculate_entity_score(cand, sum_scores, token_number, token), axis=1)
+        return candidates
+
+    def calculate_score_lemma(self, candidates, lemma):
+        tokens = candidates["lemma"].unique()
+        token_number = len(tokens) - 1
+        sum_scores = self.calculate_sum_score(candidates.loc[candidates.lemma == lemma], token_number)
+        if sum_scores > 0:
+            candidates = candidates.apply(lambda cand: self.calculate_entity_score(cand, sum_scores, token_number, lemma), axis=1)
+        return candidates
 
     def calculate_score(self, candidates):
         tokens = candidates["lemma"].unique()
@@ -111,6 +129,10 @@ class Disambiguation:
         candidates["semantic_interconnections"] = 0
         return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates), axis=1)
 
+    def calculate_semantic_interconnections_lemma(self, candidates, lemma):
+        candidates["semantic_interconnections"] = 0
+        return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates) if cand["lemma"] == lemma else cand, axis=1)
+
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
         lemmatization_data = self.lemmatizer.lemmatize_orth(text, lang)
         tokens = lemmatization_data[0]
@@ -119,9 +141,9 @@ class Disambiguation:
         print(candidates.shape)
         if candidates.empty:
             return { "data": [] }
+        candidates = self.densest_subgraph(candidates)
         candidates = self.calculate_semantic_interconnections(candidates)
         candidates = self.calculate_score(candidates)
-        candidates = self.densest_subgraph(candidates)
         candidates = self.filter_candidates(candidates)
         proposed_candidates = self.align_output_tokens(candidates, tokens, words)
         return {
@@ -137,6 +159,8 @@ class Disambiguation:
         if candidates.empty:
             return {"data": []}
         candidates = self.densest_subgraph(candidates)
+        candidates = self.calculate_semantic_interconnections(candidates)
+        candidates = self.calculate_score(candidates)
         candidates = self.filter_candidates(candidates)
         proposed_candidates = self.align_output(candidates, input_data)
         return filter_output(proposed_candidates, True)

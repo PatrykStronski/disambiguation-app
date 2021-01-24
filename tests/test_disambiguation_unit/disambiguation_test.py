@@ -53,6 +53,71 @@ def test_calculate_semantic_interconnections_bidirectional_more_complex2():
     assert candidates.iloc[2]["semantic_interconnections"] == 0
     assert candidates.iloc[3]["semantic_interconnections"] == 0
 
+
+def test_calculate_semantic_interconnections_lemma_simple():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": [], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w1")
+    assert candidates.iloc[0]["semantic_interconnections"] == 0
+    assert candidates.iloc[1]["semantic_interconnections"] == 0
+    assert candidates.iloc[2]["semantic_interconnections"] == 0
+    candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w2")
+    assert candidates.iloc[0]["semantic_interconnections"] == 0
+    assert candidates.iloc[1]["semantic_interconnections"] == 1
+    assert candidates.iloc[2]["semantic_interconnections"] == 0
+
+def test_calculate_semantic_interconnections_lemma_bidirectional():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": ["http://a/w1"], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w1")
+    assert candidates.iloc[0]["semantic_interconnections"] == 1
+    assert candidates.iloc[1]["semantic_interconnections"] == 0
+    assert candidates.iloc[2]["semantic_interconnections"] == 0
+    candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w3")
+    assert candidates.iloc[0]["semantic_interconnections"] == 0
+    assert candidates.iloc[1]["semantic_interconnections"] == 0
+    assert candidates.iloc[2]["semantic_interconnections"] == 0
+    candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w2")
+    assert candidates.iloc[0]["semantic_interconnections"] == 0
+    assert candidates.iloc[1]["semantic_interconnections"] == 1
+    assert candidates.iloc[2]["semantic_interconnections"] == 0
+
+def test_calculate_semantic_interconnections_lemma_bidirectional_more_complex():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": ["http://a/w1"], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3.1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w2")
+    assert candidates.iloc[0]["semantic_interconnections"] == 0
+    assert candidates.iloc[1]["semantic_interconnections"] == 2
+    assert candidates.iloc[2]["semantic_interconnections"] == 0
+    assert candidates.iloc[3]["semantic_interconnections"] == 0
+
+def test_calculate_semantic_interconnections_lemma_bidirectional_more_complex2():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": ["http://a/w1"], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3.1", "sign": ["http://a/w22", "http://a/w8"], "semantic_interconnections": 0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w3")
+    assert candidates.iloc[0]["semantic_interconnections"] == 0
+    assert candidates.iloc[1]["semantic_interconnections"] == 0
+    assert candidates.iloc[2]["semantic_interconnections"] == 0
+    assert candidates.iloc[3]["semantic_interconnections"] == 0
+
 def test_calculate_score_simple():
     candidates = pd.DataFrame([
         {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "semantic_interconnections": 1, "deg": 10, "score": 0.0},
@@ -97,6 +162,56 @@ def test_calculate_score_complex2():
     assert candidates.iloc[0]["score"] == 1.0
     assert candidates.iloc[1]["score"] == 0.5
     assert candidates.iloc[2]["score"] == 0.5
+    assert candidates.iloc[3]["score"] == 0.0
+    assert candidates.iloc[4]["score"] == 0.25
+    assert candidates.iloc[5]["score"] == 0.75
+
+
+def test_calculate_score_lemma_simple():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "semantic_interconnections": 1, "deg": 10, "score": 0.0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "semantic_interconnections": 2, "deg": 20, "score": 0.0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "semantic_interconnections": 0, "deg": 15, "score": 0.0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3.1", "semantic_interconnections": 1, "deg": 10, "score": 0.0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.calculate_score_lemma(candidates, "w1")
+    assert candidates.iloc[0]["score"] == 1.0
+    assert candidates.iloc[1]["score"] == 0.0
+    assert candidates.iloc[2]["score"] == 0.0
+    assert candidates.iloc[3]["score"] == 0.0
+
+def test_calculate_score_lemma_complex():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "semantic_interconnections": 1, "deg": 10, "score": 0.0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "semantic_interconnections": 2, "deg": 20, "score": 0.0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2.1", "semantic_interconnections": 2, "deg": 20, "score": 0.0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "semantic_interconnections": 0, "deg": 15, "score": 0.0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3.1", "semantic_interconnections": 1, "deg": 10, "score": 0.0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.calculate_score_lemma(candidates, "w1")
+    candidates = dis.calculate_score_lemma(candidates, "w2")
+    assert candidates.iloc[0]["score"] == 1.0
+    assert candidates.iloc[1]["score"] == 0.5
+    assert candidates.iloc[2]["score"] == 0.5
+    assert candidates.iloc[3]["score"] == 0.0
+    assert candidates.iloc[4]["score"] == 0.0
+
+def test_calculate_score_lemma_complex2():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "semantic_interconnections": 1, "deg": 10, "score": 0.0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "semantic_interconnections": 2, "deg": 20, "score": 0.0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2.1", "semantic_interconnections": 2, "deg": 20, "score": 0.0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "semantic_interconnections": 0, "deg": 15, "score": 0.0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3.1", "semantic_interconnections": 1, "deg": 10, "score": 0.0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3.2", "semantic_interconnections": 3, "deg": 10, "score": 0.0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.calculate_score_lemma(candidates, "w3")
+    assert candidates.iloc[0]["score"] == 0.0
+    assert candidates.iloc[1]["score"] == 0.0
+    assert candidates.iloc[2]["score"] == 0.0
     assert candidates.iloc[3]["score"] == 0.0
     assert candidates.iloc[4]["score"] == 0.25
     assert candidates.iloc[5]["score"] == 0.75

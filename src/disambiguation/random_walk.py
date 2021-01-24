@@ -1,7 +1,7 @@
 import random
 import pandas as pd
 import time
-from config import SUPPORTED_LANGUAGES_SUFFIXES, SUPPORTED_LANGUAGES, LANGUAGE_ALIAS, PHRASE_SEPARATOR
+from config import SUPPORTED_LANGUAGES, LANGUAGE_ALIAS, PHRASE_SEPARATOR
 
 class RandomWalk:
     initial_node_uri = ""
@@ -18,13 +18,13 @@ class RandomWalk:
     lemmatizer = None
     princeton = "all"
 
-    def __init__(self, initial_node_uri, node_properties, depth, threshold_visits, restart_probability, neo4j_src, neo4j_new, lemmatizer):
+    def __init__(self, initial_node_uri, node_properties, max_iterations, threshold_visits, restart_probability, neo4j_src, neo4j_new, lemmatizer):
         self.lemmatizer = lemmatizer
         self.polish_lemmatization_code = None
         self.initial_node_uri = initial_node_uri
         self.current_node_uri = initial_node_uri
         self.node_properties = self.prepare_language_labels(node_properties)
-        self.max_iterations = depth
+        self.max_iterations = max_iterations
         self.threshold_visits = threshold_visits
         self.restart_probability = restart_probability
         self.neo4j_src = neo4j_src
@@ -48,7 +48,6 @@ class RandomWalk:
     def align_labels(self, labels):
         joined = " ".join(labels)
         return joined.replace(PHRASE_SEPARATOR+" ", PHRASE_SEPARATOR).replace(" "+PHRASE_SEPARATOR, PHRASE_SEPARATOR)
-
 
     def create_lemmatized_labels(self):
         temporary_languages = {}
@@ -141,7 +140,7 @@ class RandomWalk:
 
     def get_graph(self):
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-        print(strong_relations)
+        return strong_relations
 
     def insert_graph(self):
         #self.time = time.time()
