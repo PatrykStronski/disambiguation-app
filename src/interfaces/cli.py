@@ -10,6 +10,7 @@ Disamb = Disambiguation()
 logger = Logger()
 
 def xml_to_tsv(args):
+    """ SEMEVAL Notation """
     if len(args) < 5:
         logger.error("Wrong arguments, stopping...")
         return
@@ -54,6 +55,7 @@ def inline(args):
     pprint.pprint(Disamb.disambiguate_text(text, language))
 
 def conll_export(args):
+    """ POLEVAL NOTATION """
     if len(args) < 5:
         logger.error("Wrong arguments, stopping...")
         return

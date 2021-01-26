@@ -16,7 +16,7 @@ def write_semeval_tsv(new_file, data, filename):
     dict_wrt = csv.DictWriter(new_file, ["from", "to", "wnid"], delimiter=CONLL_DELIMITER)
     for sentence in data:
         for row in sentence:
-            dict_wrt.writerow({ "from": row["order_id"], "to": row["order_id"], "wnid": row["wn_id"] })
+            dict_wrt.writerow({ "from": row["order_id"], "to": row["order_id"], "wnid": row["pwn_id"] })
     logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
 
 def read_input_data(filename, format):

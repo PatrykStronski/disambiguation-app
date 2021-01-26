@@ -26,6 +26,7 @@ def map_candidates(ind, t_id, word, token, cand_set):
             "semantic_interconnections": 0,
             "score": 0.0,
             "sign": cand["sign"],
+            "pwn_id": cand["pwn_id"],
             "labels": cand["labels"]
         })
     return rows
@@ -61,6 +62,7 @@ def extract_entries(entry_dict, candidate_set):
             "semantic_interconnections": 0,
             "score": 0.0,
             "sign": cand["sign"],
+            "pwn_id": cand["pwn_id"],
             "labels": cand["labels"]
         })
     return rows

@@ -162,4 +162,7 @@ class Disambiguation:
         candidates = self.calculate_score(candidates)
         candidates = self.filter_candidates(candidates)
         proposed_candidates = self.align_output(candidates, input_data)
-        return filter_output(proposed_candidates, True)
+        if lang == "polish":
+            return filter_output(proposed_candidates, True)
+        else:
+            return filter_output(proposed_candidates, False)

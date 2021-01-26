@@ -17,16 +17,16 @@ class Neo4jDisambiguation:
         if word == "*" or word == "**":
             return []
         if lang == "polish":
-            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + PHRASE_SEPARATOR + word.lower() + PHRASE_SEPARATOR + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels_polish AS prefLabel")
+            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + PHRASE_SEPARATOR + word.lower() + PHRASE_SEPARATOR + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels_polish AS prefLabel, n.princeton_id AS pwn_id")
         else:
-            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_english CONTAINS '" + PHRASE_SEPARATOR + word.lower() + PHRASE_SEPARATOR + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels_english AS prefLabel")
-        return [{ "uri": record["uri"], "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result]
+            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_english CONTAINS '" + PHRASE_SEPARATOR + word.lower() + PHRASE_SEPARATOR + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels_english AS prefLabel, n.princeton_id AS pwn_id")
+        return [{ "uri": record["uri"], "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"], "pwn_id": record["pwn_id"] } for record in result]
 
     def find_word_labels_weak(self, word, lang):
         if len(word) < 3 or re.match('-.*-', word):
             return []
         if lang == "polish":
-            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + word.lower() + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
+            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + word.lower() + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel, n.princeton_id AS pwn_id")
         else:
-            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_english CONTAINS '" + word.lower() + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel")
+            result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_english CONTAINS '" + word.lower() + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels AS prefLabel, n.princeton_id AS pwn_id")
         return [{ "uri": record["uri"], "deg": record["deg"], "sign": record["sign"], "labels": record["prefLabel"] } for record in result]
