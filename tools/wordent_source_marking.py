@@ -24,8 +24,7 @@ def find_offset(princeton_id):
       if str(princeton_id) == str(sense[1]):
          ids.append(sense[0])
    if len(ids) > 0:
-      print(" ".join(ids))
-      return ", ".join(ids)
+      return " ".join(ids)
    return princeton_id
 
 for row in read_tsv:

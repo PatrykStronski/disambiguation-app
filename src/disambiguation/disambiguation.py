@@ -2,7 +2,7 @@ from math import isnan
 from services.neo4j_disambiguation import Neo4jDisambiguation
 from utils.mapper import merge_into_dataframe, filter_output, merge_with_data
 from utils.lemmatizer import Lemmatizer
-from config import DISAMBIGUATION_THRESHOLD, AMBIGUITY_LEVEL, CANDIDATES_FIELDS, IS_WEAK
+from config import DISAMBIGUATION_THRESHOLD, AMBIGUITY_LEVEL, CANDIDATES_FIELDS
 
 class Disambiguation:
     neo4j_mgr = None
@@ -150,10 +150,7 @@ class Disambiguation:
         }
 
     def disambiguate_from_data(self, input_data, lang):  # lang must be 'polish' or 'english'
-        if IS_WEAK:
-            candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels_weak(token, lang) for token in input_data["lemma"].tolist()])
-        else:
-            candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels(token, lang) for token in input_data["lemma"].tolist()])
+        candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels(token, lang) for token in input_data["lemma"].tolist()])
         print(candidates.shape)
         if candidates.empty:
             return {"data": []}

@@ -5,6 +5,11 @@ from config import CANDIDATES_FIELDS, CONLL_DELIMITER, POLEVAL_EXPORTED_FIELDS_U
 
 logger = Logger()
 
+def remove_comas(pwnid):
+    if type(pwnid) == str:
+        return "wn:"+pwnid.split(", ")[0]
+    return pwnid
+
 def write_conll(new_file, data, filename):
     dict_wrt = csv.DictWriter(new_file, POLEVAL_EXPORTED_FIELDS_UP, delimiter=CONLL_DELIMITER)
     dict_wrt.writeheader()
@@ -16,7 +21,8 @@ def write_semeval_tsv(new_file, data, filename):
     dict_wrt = csv.DictWriter(new_file, ["from", "to", "wnid"], delimiter=CONLL_DELIMITER)
     for sentence in data:
         for row in sentence:
-            dict_wrt.writerow({ "from": row["order_id"], "to": row["order_id"], "wnid": row["pwn_id"] })
+            if type(row["pwn_id"]) == str and row["pwn_id"] != "_":
+                dict_wrt.writerow({ "from": row["order_id"], "to": row["order_id"], "wnid": remove_comas(row["pwn_id"]) })
     logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
 
 def read_input_data(filename, format):
