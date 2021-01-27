@@ -12,16 +12,26 @@ def map_sentence(sentence, text_df):
         text_df = text_df.append(word_mapped, ignore_index=True)
     return text_df
 
+#def map_xml_semeval(data):
+#    parsed = []
+#    for text in  data["corpus"]["text"]:
+#        text_df = pd.DataFrame(columns=CANDIDATES_FIELDS)
+#        if type(text["sentence"]) == list:
+#            for sent in text["sentence"]:
+#                text_df = map_sentence(sent, text_df)
+#        else:
+#            text_df = map_sentence(text["sentence"], text_df)
+#        parsed.append(text_df)
+#    return parsed
+
 def map_xml_semeval(data):
     parsed = []
     for text in  data["corpus"]["text"]:
-        text_df = pd.DataFrame(columns=CANDIDATES_FIELDS)
         if type(text["sentence"]) == list:
             for sent in text["sentence"]:
-                text_df = map_sentence(sent, text_df)
+                parsed.append(map_sentence(sent, pd.DataFrame(columns=CANDIDATES_FIELDS)))
         else:
-            text_df = map_sentence(text["sentence"], text_df)
-        parsed.append(text_df)
+            parsed.append(map_sentence(text["sentence"], pd.DataFrame(columns=CANDIDATES_FIELDS)))
     return parsed
 
 

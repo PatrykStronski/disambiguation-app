@@ -16,6 +16,10 @@ class Neo4jDisambiguation:
     def find_word_labels(self, word, lang):
         if word == "*" or word == "**" or not word:
             return []
+        if '"' in word:
+            word = word.replace('"', '\\"')
+        if  "'" in word:
+            word = word.replace("'", "\\'")
         if lang == "polish":
             result = self.session.run("MATCH (n:Resource) -[r]-> (b:Resource) WHERE n.labels_polish CONTAINS '" + PHRASE_SEPARATOR + word.lower() + PHRASE_SEPARATOR + "' RETURN n.uri AS uri, COUNT(r) as deg, collect(b.uri) AS sign, n.labels_polish AS prefLabel, n.princeton_id AS pwn_id")
         else:
