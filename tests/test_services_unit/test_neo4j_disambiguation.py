@@ -20,7 +20,7 @@ def test_find_words_labels_english():
     label = "ocean"
     lang = "english"
     candidates = neo_mgr.find_word_labels(label, lang)
-    assert len(candidates) == 4
+    assert len(candidates) == 2
 
 def test_find_words_labels_english_weak():
     label = "ocean"

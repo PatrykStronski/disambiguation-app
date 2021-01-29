@@ -84,9 +84,9 @@ def test_calculate_semantic_interconnections_bidirectional_more_complex2():
 
 def test_calculate_semantic_interconnections_lemma_simple():
     candidates = pd.DataFrame([
-        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
-        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": [], "semantic_interconnections": 0},
-        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0}
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "deg": 0.0, "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0, "semantic_in_connections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2",  "deg": 0.0, "sign": [], "semantic_interconnections": 0, "semantic_in_connections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3",  "deg": 0.0, "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0, "semantic_in_connections": 0}
     ])
     dis = Disambiguation(5,0.2)
     candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w1")
@@ -112,9 +112,9 @@ def test_calculate_semantic_interconnections_lemma_simple():
 
 def test_calculate_semantic_interconnections_lemma_bidirectional():
     candidates = pd.DataFrame([
-        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
-        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": ["http://a/w1"], "semantic_interconnections": 0},
-        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0}
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0, "semantic_in_connections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": ["http://a/w1"], "semantic_interconnections": 0, "semantic_in_connections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0, "semantic_in_connections": 0}
     ])
     dis = Disambiguation(5,0.2)
     candidates = dis.calculate_semantic_interconnections_lemma(candidates, "w1")
