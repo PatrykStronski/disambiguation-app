@@ -1,6 +1,6 @@
 from neo4j import GraphDatabase
 
-URI = "neo4j://localhost/"
+URI = "neo4j://neo_src/"
 DB_NAME = "neo4j"
 COUNT= "10000"
 

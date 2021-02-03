@@ -68,7 +68,7 @@ def conll_export(args):
     else:
         logger.debug("Disambiguating for " + language)
     input_data = read_input_data(input_file, "conll")
-    disambiguated = Disamb.disambiguate_from_data(input_data, language)
+    disambiguated = [Disamb.disambiguate_from_data(input_text, language) for input_text in input_data]
     create_output_file(output_file, disambiguated, "conll")
 
 def initiate_cli(args):

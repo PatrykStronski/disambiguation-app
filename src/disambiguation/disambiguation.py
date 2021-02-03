@@ -81,13 +81,13 @@ class Disambiguation:
             candidates_token = candidates.loc[candidates.lemma == token]
             if candidates_token.empty:
                 empt = { key: self.check_value(input_row.get(key)) for key in CANDIDATES_FIELDS }
-                empt["lemma"] = token
-                empt["token_id"] = ind
                 out.append(empt)
             else:
                 idx = candidates_token["score"].argmax()
-                out.append(candidates_token.iloc[idx].to_dict())
-            ind += 1
+                entr = { key: self.check_value(input_row.get(key)) for key in CANDIDATES_FIELDS }
+                entr["pwn_id"] = candidates_token.iloc[idx]["pwn_id"]
+                entr["wn_id"] = candidates_token.iloc[idx]["wn_id"]
+                out.append(entr)
         return out
 
     def align_output_tokens(self, candidates, tokens, words):

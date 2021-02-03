@@ -1,6 +1,6 @@
 import xmltodict
 import json
-from config import CANDIDATES_FIELDS, EXPORT_DIR, SEMEVAL_MAPPING
+from config import SENTENCE_DISTINCTION, CANDIDATES_FIELDS, EXPORT_DIR, SEMEVAL_MAPPING
 import pandas as pd
 
 def default(val = ""):
@@ -24,9 +24,9 @@ def map_xml_semeval(data):
         parsed.append(text_df)
     return parsed
 
-def map_xml_semeval1(data):
+def map_xml_semeval_sentences(data):
     parsed = []
-    for text in  data["corpus"]["text"]:
+    for text in data["corpus"]["text"]:
         if type(text["sentence"]) == list:
             for sent in text["sentence"]:
                 parsed.append(map_sentence(sent, pd.DataFrame(columns=CANDIDATES_FIELDS)))
@@ -39,4 +39,6 @@ def read_input_xml(filename):
     xml_file = open(EXPORT_DIR + filename)
     xml = xml_file.read()
     xml_parsed = json.loads(json.dumps(xmltodict.parse(xml)))
+    if SENTENCE_DISTINCTION:
+        return map_xml_semeval_sentences(xml_parsed)
     return map_xml_semeval(xml_parsed)
