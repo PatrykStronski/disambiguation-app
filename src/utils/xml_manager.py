@@ -34,7 +34,6 @@ def map_xml_semeval_sentences(data):
             parsed.append(map_sentence(text["sentence"], pd.DataFrame(columns=CANDIDATES_FIELDS)))
     return parsed
 
-
 def read_input_xml(filename):
     xml_file = open(EXPORT_DIR + filename)
     xml = xml_file.read()

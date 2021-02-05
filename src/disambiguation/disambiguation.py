@@ -115,7 +115,7 @@ class Disambiguation:
         connections_nmb_relates = candidates_different[boolean_mask].shape[0]
         cand.at["semantic_interconnections"] = connections_nmb_relates
         #calculate v IN SemSign(v')
-        boolean_mask = candidates_different.sign.apply(lambda c: self.contains_uri(uri, c))
+        boolean_mask = candidates_different.sign.apply(lambda candidate_sign: self.contains_uri(uri, candidate_sign))
         connections_nmb_is_related = candidates_different[boolean_mask].shape[0]
         cand.at["semantic_in_connections"] = connections_nmb_is_related
         cand.at["deg"] = connections_nmb_is_related + connections_nmb_relates
@@ -153,7 +153,7 @@ class Disambiguation:
         candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels(token, lang) for token in input_data["lemma"].tolist()])
         print(candidates.shape)
         if candidates.empty:
-            return {"data": []}
+            return []
         candidates = self.densest_subgraph(candidates)
         candidates = self.calculate_semantic_interconnections(candidates)
         candidates = self.calculate_score(candidates)

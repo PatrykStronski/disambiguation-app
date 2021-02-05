@@ -11,12 +11,18 @@ def remove_comas(pwnid):
     return pwnid
 
 def write_conll(new_file, data, filename):
+    all_rows = 0
+    proposed_guesses = 0
     dict_wrt = csv.DictWriter(new_file, POLEVAL_EXPORTED_FIELDS_UP, delimiter=CONLL_DELIMITER)
     dict_wrt.writeheader()
     for sentence in data:
+        all_rows += len(sentence)
         for row in sentence:
+            if row.get("wn_id") != "_":
+                proposed_guesses += 1
             dict_wrt.writerow({key.upper(): row[key] for key in row.keys()})
     logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
+    logger.successful("The assumed recall is: " + str(proposed_guesses/all_rows))
 
 def write_semeval_tsv(new_file, data, filename):
     dict_wrt = csv.DictWriter(new_file, ["from", "to", "wnid"], delimiter=CONLL_DELIMITER)
@@ -39,10 +45,11 @@ def distinct_sentences_conll(parsed):
     data = []
     sentence = pd.DataFrame(columns=CANDIDATES_FIELDS)
     for row in parsed:
-        if row["#text"] == ".":
+        if row.get("TOKEN_ID") == "0" and row.get("ORDER_ID") != "0":
             data.append(sentence)
             sentence = pd.DataFrame(columns=CANDIDATES_FIELDS)
         sentence = sentence.append({key.lower(): row[key] for key in row.keys()}, ignore_index=True)
+    data.append(sentence)
     return data
 
 def read_input_data(filename, format):

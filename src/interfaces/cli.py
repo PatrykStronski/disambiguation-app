@@ -94,9 +94,3 @@ def initiate_infinite_cli():
         text = input("Provide text for disambiguation: ")
         logger.debug("Your disambiguation is on the way...")
         pprint.pprint(Disamb.disambiguate_text(text, lang))
-
-def disambiguate_std(text, lang = "english"):
-        pprint.pprint(Disamb.disambiguate_text(text, lang))
-
-def disambiguate_std_file(text, lang="english", file = "out.conll"):
-    disambiguated = Disamb.disambiguate_text(text, lange)
