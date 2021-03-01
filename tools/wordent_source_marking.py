@@ -27,9 +27,13 @@ def find_offset(princeton_id):
       return " ".join(ids)
    return princeton_id
 
+ind = 0
 for row in read_tsv:
+   ind += 1
    if row[0] == "plwordnet_id":
       continue
+   if ind % 100 == 0:
+      print(ind)
    synset = PREFIX + row[0]
    princeton_id = row[1]
    princeton_offset = find_offset(princeton_id)
