@@ -36,5 +36,6 @@ for row in read_tsv:
    session.run('MATCH (n:Resource { uri: "' + synset + '"}) SET n.princeton = true SET n.princeton_id = "' + princeton_offset + '"')
 #session.run("MATCH (n:Resource) WHERE n.uri STARTS WITH '" + PREFIX + "' AND n.princeton IS NULL SET n.princeton = false")
 tsv_file.close()
+senses_file.close()
 session.close()
 driver.close()
