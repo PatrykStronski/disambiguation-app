@@ -10,7 +10,7 @@ class RandomWalk:
     node_visit_counts = pd.DataFrame()
     max_iterations = 0
     depth = 0
-    iterations_level = 0
+    iterations_count = 0
     threshold_visits = 1
     restart_probability = 0.0
     neo4j_src = None
@@ -101,40 +101,30 @@ class RandomWalk:
             self.node_visit_counts.loc[(self.node_visit_counts["node2"] == picked_relation["node2"]), ["count"]] += 1
 
     def random_walk_with_restart(self):
-        if self.iterations_level >= self.max_iterations:
+        if self.iterations_count >= self.max_iterations:
             return
         if self.should_restart():
             self.depth = 0
             self.current_node_uri = self.initial_node_uri
 
-        #self.time = time.time()
-
         relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri), columns = ["node2", "weight"])
-        if self.iterations_level == 0:
-            self.node_properties["deg"] = relations.shape[0]
-
-        #new_time = time.time()
-        #print("Processing OF relations fetch:" + str(new_time - self.time))
-        #self.time = new_time
 
         if relations.empty:
             if self.current_node_uri == self.initial_node_uri:
                 return
             else:
-                self.iterations_level += 1
+                self.iterations_count += 1
                 self.current_node_uri = self.initial_node_uri
                 return self.random_walk_with_restart()
-        initial_node_in_vicinity = self.initial_node_uri in relations.node2
         self.depth += 1
-        if initial_node_in_vicinity:
-            self.depth = 1
         picked_relation = self.choose_relation(relations)
+
+        if picked_relation["node2"] == self.initial_node_uri:
+            self.depth = 0
+
         self.increment_visits(picked_relation)
         self.current_node_uri = picked_relation["node2"]
-        self.iterations_level += 1
-
-        #new_time = time.time()
-        #print("Processing OF calculations PANDAS fetch:" + str(new_time - self.time))
+        self.iterations_count += 1
 
         return self.random_walk_with_restart()
 
@@ -143,12 +133,8 @@ class RandomWalk:
         return strong_relations
 
     def insert_graph(self):
-        #self.time = time.time()
         if self.polish_lemmatization_code:
             self.node_properties["labels_polish"] += self.align_labels(self.lemmatizer.download_lemmatization(self.polish_lemmatization_code, PHRASE_SEPARATOR)[0])
         self.neo4j_new.create_node(self.node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
         self.neo4j_new.create_relation(self.initial_node_uri, strong_relations["node2"].values)
-        #new_time = time.time()
-        #print("Processing OF relation creation:" + str(new_time - self.time))
-        #self.time = new_time
