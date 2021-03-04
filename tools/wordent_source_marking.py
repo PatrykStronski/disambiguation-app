@@ -11,7 +11,7 @@ senses_arr = []
 for sense_r in read_senses:
    senses_arr.append((sense_r[0], sense_r[1]))
 
-URI = "neo4j://neo_dest/"
+URI = "neo4j://neo_src/"
 DB_NAME = "neo4j"
 PREFIX = "http://plwordnet.pwr.wroc.pl/wordnet/synset/"
 
@@ -37,7 +37,7 @@ for row in read_tsv:
    synset = PREFIX + row[0]
    princeton_id = row[1]
    princeton_offset = find_offset(princeton_id)
-   session.run('MATCH (n:Resource { uri: "' + synset + '"}) SET n.princeton = true SET n.princeton_id = "' + princeton_offset + '"')
+   session.run('MATCH (n:Resource { uri: "' + synset + '"}) SET n.princeton = TRUE SET n.princeton_id = "' + princeton_offset + '"')
 #session.run("MATCH (n:Resource) WHERE n.uri STARTS WITH '" + PREFIX + "' AND n.princeton IS NULL SET n.princeton = false")
 tsv_file.close()
 senses_file.close()

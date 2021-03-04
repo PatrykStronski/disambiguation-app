@@ -2,14 +2,15 @@ version: '3'
 
 services:
   neo_src:
-    image: neo4j:4.2.0
+    image: neo4j:4.1.3
     user: ${UID:-1000}:${GID:-1000}
     volumes:
       - ../storage/neo_src:/data
+      - ../wordnet:/wordnet
     environment:
       NEO4j_dbms.memory.pagecache.size: ${NEO_PAGESIZE}
       NEO4J_AUTH: ${NEOSRC_NEO4J_AUTH}
-#      NEO4JLABS_PLUGINS: '["n10s"]'
+      NEO4JLABS_PLUGINS: '["n10s"]'
     deploy:
       resources:
         limits:
