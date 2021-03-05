@@ -49,30 +49,41 @@ class RandomWalk:
         joined = " ".join(labels)
         return joined.replace(PHRASE_SEPARATOR+" ", PHRASE_SEPARATOR).replace(" "+PHRASE_SEPARATOR, PHRASE_SEPARATOR)
 
+    def extract_labels(self, temporary_languages, prop):
+        if "label" in prop.lower() and type(self.node_properties[prop]) is list:
+            for label in self.node_properties[prop]:
+                language = self.detect_langauge(label)
+                if language:
+                    if " " in label:
+                        temporary_languages[language + "_lemmatize"] += PHRASE_SEPARATOR + label + PHRASE_SEPARATOR
+                    else:
+                        temporary_languages[language] += PHRASE_SEPARATOR + label[:-3].lower() + PHRASE_SEPARATOR
+        return temporary_languages
+
+    def get_lemmatized_trigger_lemmatization(self, temporary_languages, lang):
+        self.node_properties["labels_" + lang] = ""
+        if temporary_languages[lang]:
+            self.node_properties["labels_" + lang] += "".join(temporary_languages[lang])
+        if temporary_languages[lang + "_lemmatize"]:
+            if lang != "polish":
+                self.node_properties["labels_" + lang] += self.align_labels(
+                    self.lemmatizer.lemmatize(temporary_languages[lang + "_lemmatize"], lang, False))
+            else:
+                self.polish_lemmatization_code = self.lemmatizer.lemmatizer_initiate_task(
+                    temporary_languages["polish_lemmatize"])
+
     def create_lemmatized_labels(self):
         temporary_languages = {}
+
         for lang in SUPPORTED_LANGUAGES:
             temporary_languages[lang] = ""
             temporary_languages[lang+"_lemmatize"] = ""
-        for prop in self.node_properties.keys():
-            if "label" in prop.lower() and type(self.node_properties[prop]) is list:
-                for label in self.node_properties[prop]:
-                    language = self.detect_langauge(label)
-                    if language:
-                        if " " in label:
-                            temporary_languages[language+"_lemmatize"] += PHRASE_SEPARATOR + label[:-3].lower() + PHRASE_SEPARATOR
-                        else:
-                            temporary_languages[language] += PHRASE_SEPARATOR + label[:-3].lower() + PHRASE_SEPARATOR
-        for lang in SUPPORTED_LANGUAGES:
-            self.node_properties["labels_" + lang] = ""
-            if temporary_languages[lang]:
-                self.node_properties["labels_" + lang] += "".join(temporary_languages[lang])
-            if temporary_languages[lang+"_lemmatize"]:
-                if lang != "polish":
-                    self.node_properties["labels_" + lang] += self.align_labels(self.lemmatizer.lemmatize(temporary_languages[lang+"_lemmatize"], lang, False))
-                else:
-                    self.polish_lemmatization_code = self.lemmatizer.lemmatizer_initiate_task(temporary_languages["polish_lemmatize"])
 
+        for prop in self.node_properties.keys():
+            temporary_languages = self.extract_labels(temporary_languages, prop)
+
+        for lang in SUPPORTED_LANGUAGES:
+            self.get_lemmatized_trigger_lemmatization(temporary_languages, lang)
 
     def extract_princeton(self):
         princeton = self.node_properties.get("princeton")
@@ -105,6 +116,7 @@ class RandomWalk:
             return
         if self.should_restart():
             self.depth = 0
+            self.iterations_count += 1
             self.current_node_uri = self.initial_node_uri
 
         relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri), columns = ["node2", "weight"])

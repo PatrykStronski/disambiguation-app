@@ -12,26 +12,18 @@ class Neo4jDb:
         self.driver = GraphDatabase.driver(self.URI)
         self.session = self.driver.session(database = self.database_name)
 
-    def map_related_nodes(self, record):
-        return {
-            'node2': record['node2'],
-            'weight': record['weight'] + 1
-        }
-
     def get_related_nodes_weighted(self, node, princeton, initial_uri):
         query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE b.uri <> "' + initial_uri + '" \
-            OPTIONAL MATCH (b) -[r2]-> (n) \
             OPTIONAL MATCH (b) --> (c: Resource), \
             (c) -[r_triangle]-> (n) \
-            RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
+            RETURN b.uri AS node2, COUNT(r_triangle) AS weight'
         if princeton != "ALL":
             query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE b.princeton = '+ princeton +' AND b.uri <> "' + initial_uri + '"  \
-                OPTIONAL MATCH (b) -[r2]-> (n) \
                 OPTIONAL MATCH (b) --> (c: Resource), \
                 (c) -[r_triangle]-> (n) WHERE c.princeton = '+ princeton +' \
-                RETURN b.uri AS node2, r AS relation, r2 AS relation2, COUNT(r_triangle) AS weight'
+                RETURN b.uri AS node2, COUNT(r_triangle) AS weight'
         result = self.session.run(query)
-        return [self.map_related_nodes(record) for record in result]
+        return [{'node2': record['node2'], 'weight': record['weight']} for record in result]
 
     def get_number_of_nodes(self):
         result = self.session.run('MATCH (n:Resource) RETURN COUNT(n) AS qty')
@@ -52,8 +44,8 @@ class Neo4jDb:
         return separator.join(props)
 
     def create_node(self, properties):
-        props = self.compose_props(properties)
-        self.session.run('MERGE (n:Resource {uri: "' + properties['uri'] + '"}) SET ' + props)
+        props_string = self.compose_props(properties)
+        self.session.run('MERGE (n:Resource {uri: "' + properties['uri'] + '"}) SET ' + props_string)
 
     def create_relation(self, node1_uri, node2_list):
         if len(node2_list) == 0:
