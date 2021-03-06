@@ -3,6 +3,7 @@ LANGUAGE_ALIAS = {
     "english": "@en"
 }
 PHRASE_SEPARATOR = "*"
+DIRECTED_RELATIONS = False
 
 ###LEMMATIZATION
 

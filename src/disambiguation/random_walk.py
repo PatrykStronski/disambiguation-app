@@ -62,8 +62,10 @@ class RandomWalk:
 
     def get_lemmatized_trigger_lemmatization(self, temporary_languages, lang):
         self.node_properties["labels_" + lang] = ""
+
         if temporary_languages[lang]:
             self.node_properties["labels_" + lang] += "".join(temporary_languages[lang])
+
         if temporary_languages[lang + "_lemmatize"]:
             if lang != "polish":
                 self.node_properties["labels_" + lang] += self.align_labels(

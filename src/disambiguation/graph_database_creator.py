@@ -24,30 +24,20 @@ class GraphDatabaseCreator:
         self.redis_checker = RedisChecker()
         self.lemmatizer = Lemmatizer()
 
-    def add_depth_distributions(self, dist1, dist2):
-        for ind in range(0,20):
-            dist1[ind] += dist2[ind]
-        return dist1
-
-    def present_depth_distribution(self, dist, node_count):
-        output = []
-        for ind in range(0,20):
-            output.append(str(ind) + ": " + str(dist[ind]/node_count))
-        print("Journey length distribution: ")
-        print("; ".join(output))
-
     def create_graph(self, start, end):
-
         for node_index in range(start, end):
             (node_uri, node_properties) = self.neo4j_mgr.get_node_by_index(node_index);
             print("IN PROCESSING:" + node_uri)
             is_processed = self.redis_checker.get_processed_id(node_uri)
+
             if is_processed == "DONE":
                 print("The node has already been processed. Carrying on...")
                 continue
+
             init_graph = RandomWalk(node_uri, node_properties, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new, self.lemmatizer)
             init_graph.random_walk_with_restart()
             self.redis_checker.insert_processed_id(node_uri)
+
             if node_index % 100 == 0:
                 print("Created semsign for: " + str(node_index))
                 if node_index % 2000 == 0:
