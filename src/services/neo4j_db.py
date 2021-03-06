@@ -23,7 +23,7 @@ class Neo4jDb:
                 (c) -[r_triangle]-> (n) WHERE c.princeton = '+ princeton +' \
                 RETURN b.uri AS node2, COUNT(r_triangle) AS weight'
         result = self.session.run(query)
-        return [{'node2': record['node2'], 'weight': record['weight']} for record in result]
+        return [{'node2': record['node2'], 'weight': record['weight'] + 1} for record in result]
 
     def get_number_of_nodes(self):
         result = self.session.run('MATCH (n:Resource) RETURN COUNT(n) AS qty')
