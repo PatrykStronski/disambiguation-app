@@ -27,8 +27,7 @@ class Neo4jDb:
             else:
                 query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]- (b:Resource) WHERE b.princeton = '+ princeton +' AND b.uri <> "' + initial_uri + '"  \
                     OPTIONAL MATCH (b) -- (c: Resource), \
-                    (c) -[r_triangle]- (n) WHERE c.princeton = '+ princeton +' \
-                    WHERE c.uri <> b.uri AND c.uri <> n.uri \
+                    (c) -[r_triangle]- (n) WHERE c.princeton = '+ princeton +' AND c.uri <> b.uri AND c.uri <> n.uri \
                     RETURN b.uri AS node2, COUNT(r_triangle) AS weight'
         result = self.session.run(query)
         return [{'node2': record['node2'], 'weight': record['weight'] + 1} for record in result]
