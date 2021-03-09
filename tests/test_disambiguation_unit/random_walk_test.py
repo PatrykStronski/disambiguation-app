@@ -55,30 +55,30 @@ def test_choose_relation_biasness():
 
 def test_increment_visits_empty():
     init_graph = RandomWalk("ns", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
-    picked_relation = { "relation": "rel3", "journey_length": 1.0, "node2": "n1", "node1": "ns" }
+    picked_node = "n1"
     assert init_graph.node_visit_counts.shape == (0,2)
-    init_graph.increment_visits(picked_relation)
-    assert init_graph.node_visit_counts.shape == (1,3)
-    assert { "count": 1, "journey_length": 0.0, "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
+    init_graph.increment_visits(picked_node)
+    assert init_graph.node_visit_counts.shape == (1,2)
+    assert { "count": 1, "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
 
 def test_increment_visits_same_entry():
     init_graph = RandomWalk("ns", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
-    picked_relation = { "count": 1, "journey_length": 1.0, "relation": "rel3", "node1": "ns", "node2": "n1" }
+    picked_relation = { "count": 1, "node2": "n1" }
     init_graph.node_visit_counts = pd.DataFrame([picked_relation])
-    assert init_graph.node_visit_counts.shape == (1,5)
-    init_graph.increment_visits(picked_relation)
-    assert init_graph.node_visit_counts.shape == (1,5)
-    assert { "count": 2, "journey_length": 1.0, "relation": "rel3", "node1": "ns", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
+    assert init_graph.node_visit_counts.shape == (1,2)
+    init_graph.increment_visits(picked_relation["node2"])
+    assert init_graph.node_visit_counts.shape == (1,2)
+    assert { "count": 2, "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
 
 def test_increment_visits_different_entry():
     init_graph = RandomWalk("ns", { "skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)
-    old_relation = { "count": 1, "journey_length": 1.0, "relation": "rel4", "node1": "nOld", "node2": "n1" }
-    picked_relation = { "relation": "rel3", "journey_length": 1.0, "node2": "n1", "node1": "ns" }
+    old_relation = { "count": 1, "node2": "n1" }
+    picked_node = "n1"
     init_graph.node_visit_counts = pd.DataFrame([old_relation])
-    assert init_graph.node_visit_counts.shape == (1,5)
-    init_graph.increment_visits(picked_relation)
-    assert init_graph.node_visit_counts.shape == (1,5)
-    assert { "count": 2, "journey_length": 1.0, "relation": "rel4", "node1": "nOld", "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
+    assert init_graph.node_visit_counts.shape == (1, 2)
+    init_graph.increment_visits(picked_node)
+    assert init_graph.node_visit_counts.shape == (1, 2)
+    assert { "count": 2, "node2": "n1" } == init_graph.node_visit_counts.loc[0].to_dict()
 
 def test_detect_langauge():
     init_graph = RandomWalk("ns", {"skos__prefLabel": ["Label"]}, 0, 5, 0, None, None, lem)

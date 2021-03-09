@@ -1,6 +1,5 @@
 import random
 import pandas as pd
-import time
 from config import SUPPORTED_LANGUAGES, LANGUAGE_ALIAS, PHRASE_SEPARATOR
 
 class RandomWalk:
@@ -29,7 +28,6 @@ class RandomWalk:
         self.restart_probability = restart_probability
         self.neo4j_src = neo4j_src
         self.neo4j_new = neo4j_new
-        self.time = time.time()
         self.princeton = self.extract_princeton()
         self.create_lemmatized_labels()
         self.node_visit_counts = pd.DataFrame(columns = ["count", "node2"])
@@ -55,7 +53,7 @@ class RandomWalk:
                 language = self.detect_langauge(label)
                 if language:
                     if " " in label:
-                        temporary_languages[language + "_lemmatize"] += PHRASE_SEPARATOR + label + PHRASE_SEPARATOR
+                        temporary_languages[language + "_lemmatize"] += PHRASE_SEPARATOR + label[:-3].lower() + PHRASE_SEPARATOR
                     else:
                         temporary_languages[language] += PHRASE_SEPARATOR + label[:-3].lower() + PHRASE_SEPARATOR
         return temporary_languages
@@ -106,12 +104,12 @@ class RandomWalk:
     def choose_relation(self, relations):
         return relations.sample(weights = relations["weight"].values).to_dict(orient = "records")[0]
 
-    def increment_visits(self, picked_relation):
-        existing_entry = self.node_visit_counts.loc[(self.node_visit_counts["node2"] == picked_relation["node2"])]
+    def increment_visits(self, picked_node):
+        existing_entry = self.node_visit_counts.loc[(self.node_visit_counts["node2"] == picked_node)]
         if existing_entry.empty:
-            self.node_visit_counts = self.node_visit_counts.append({ "count": 1, "journey_length": self.depth, "node2": picked_relation["node2"] }, ignore_index = True)
+            self.node_visit_counts = self.node_visit_counts.append({ "count": 1, "node2": picked_node }, ignore_index = True)
         else:
-            self.node_visit_counts.loc[(self.node_visit_counts["node2"] == picked_relation["node2"]), ["count"]] += 1
+            self.node_visit_counts.loc[(self.node_visit_counts["node2"] == picked_node), ["count"]] += 1
 
     def random_walk_with_restart(self):
         if self.iterations_count >= self.max_iterations:
@@ -131,13 +129,12 @@ class RandomWalk:
                 self.current_node_uri = self.initial_node_uri
                 return self.random_walk_with_restart()
         self.depth += 1
-        picked_relation = self.choose_relation(relations)
 
-        if picked_relation["node2"] == self.initial_node_uri:
+        next_node = self.choose_relation(relations)["node2"]
+        if next_node == self.initial_node_uri:
             self.depth = 0
-
-        self.increment_visits(picked_relation)
-        self.current_node_uri = picked_relation["node2"]
+        self.increment_visits(next_node)
+        self.current_node_uri = next_node
         self.iterations_count += 1
 
         return self.random_walk_with_restart()

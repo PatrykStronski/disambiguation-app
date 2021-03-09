@@ -19,7 +19,7 @@ def test_semantic_signature_pl():
     #test semsign
     semsign = rw.get_graph()
     assert type(semsign) == pd.DataFrame
-    assert semsign.shape[0] > 3
+    assert semsign.shape[0] > 2
 
 def test_semantic_signature_pl_small_rw():
     neo_src = Neo4jDb("bolt://neo_src/", "neo4j")
@@ -64,7 +64,7 @@ def test_semantic_signature_pl_multiword():
     #test semsign
     semsign = rw.get_graph()
     assert type(semsign) == pd.DataFrame
-    assert semsign.shape[0] > 3
+    assert semsign.shape[0] > 2
 
 def test_semantic_signature_en():
     neo_src = Neo4jDb("bolt://neo_src/", "neo4j")
