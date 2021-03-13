@@ -35,8 +35,15 @@ class GraphDatabaseCreator:
                 continue
 
             init_graph = RandomWalk(node_uri, node_properties, self.max_depth, self.threshold_visits, self.restart_probability, self.neo4j_mgr, self.neo4j_new, self.lemmatizer)
+            start = time.time()
             init_graph.random_walk_with_restart()
+            print("RWR time:" + str(time.time() - start))
+            start = time.time()
             self.redis_checker.insert_processed_id(node_uri)
+            print("REDIS time:" + str(time.time() - start))
+            start = time.time()
+            init_graph.insert_graph()
+            print("INSERT GRAPH time:" + str(time.time() - start))
 
             if node_index % 100 == 0:
                 print("Created semsign for: " + str(node_index))
@@ -50,4 +57,3 @@ class GraphDatabaseCreator:
                     self.neo4j_new = Neo4jDb(self.db_dest_uri, self.db_dest)
                     self.redis_checker = RedisChecker()
                     self.lemmatizer = Lemmatizer()
-            init_graph.insert_graph()
