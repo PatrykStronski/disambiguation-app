@@ -148,4 +148,4 @@ class RandomWalk:
             self.node_properties["labels_polish"] += self.align_labels(self.lemmatizer.download_lemmatization(self.polish_lemmatization_code, PHRASE_SEPARATOR)[0])
         self.neo4j_new.create_node(self.node_properties)
         strong_relations = self.node_visit_counts.loc[self.node_visit_counts["count"] >= self.threshold_visits]
-        self.neo4j_new.create_relation(self.initial_node_uri, strong_relations["node2"].values)
+        self.neo4j_new.create_relations(self.initial_node_uri, strong_relations["node2"].values)

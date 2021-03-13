@@ -1,5 +1,5 @@
 from neo4j import GraphDatabase
-from config import DIRECTED_RELATIONS
+from config import DIRECTED_RELATIONS, CONCURRENT_RELATIONS_CREATION
 
 class Neo4jDb:
     URI = 'neo4j://neo_dest:7687/'
@@ -54,12 +54,21 @@ class Neo4jDb:
         props_string = self.compose_props(properties)
         self.session.run('MERGE (n:Resource {uri: "' + properties['uri'] + '"}) SET ' + props_string)
 
-    def create_relation(self, node1_uri, node2_list):
+    def suffix_relation_creation(nodes):
+        suffix = ''
+        for node in nodes:
+            suffix += 'MERGE (end: Resource {uri: "'+ node +'"}) MERGE (start) -[:relatesTo]->(end) '
+        return suffix
+
+    def create_relations(self, node1_uri, node2_list):
         if len(node2_list) == 0:
             print('No semsigns in ' + node1_uri);
             return
-        for node2 in node2_list:
-            query = 'MATCH (start: Resource {uri: "' + node1_uri + '"}) MERGE (end: Resource {uri: "'+ node2 +'"}) MERGE (start) -[:relatesTo]->(end)'
+        node_qty = len(node2_list)
+        for strt in range(0, node_qty//CONCURRENT_RELATIONS_CREATION):
+            nodes_strt = strt*CONCURRENT_RELATIONS_CREATION
+            nodes_end = nodes_strt + CONCURRENT_RELATIONS_CREATION
+            query = 'MATCH (start: Resource {uri: "' + node1_uri + '"})' + self.suffix_relation_creation(node2_list[nodes_strt:nodes_end])
             self.session.run(query)
 
     def __del__(self):
