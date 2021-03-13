@@ -13,13 +13,13 @@ class Neo4jDb:
         self.driver = GraphDatabase.driver(self.URI)
         self.session = self.driver.session(database = self.database_name)
 
-    def get_related_nodes_weighted(self, node, princeton, initial_uri):
+    def get_related_nodes_weighted(self, node, princeton, initial_uri, is_directed):
         query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE b.uri <> "' + initial_uri + '" \
             OPTIONAL MATCH (b) --> (c: Resource), \
             (c) -[r_triangle]-> (n) \
             RETURN b.uri AS node2, COUNT(r_triangle) AS weight'
         if princeton != "ALL":
-            if DIRECTED_RELATIONS:
+            if is_directed:
                 query = 'MATCH (n:Resource {uri: "' + node + '"}) -[r]-> (b:Resource) WHERE b.princeton = '+ princeton +' AND b.uri <> "' + initial_uri + '"  \
                     OPTIONAL MATCH (b) --> (c: Resource), \
                     (c) -[r_triangle]-> (n) WHERE c.princeton = '+ princeton +'\

@@ -1,6 +1,6 @@
 import random
 import pandas as pd
-from config import SUPPORTED_LANGUAGES, LANGUAGE_ALIAS, PHRASE_SEPARATOR
+from config import SUPPORTED_LANGUAGES, LANGUAGE_ALIAS, PHRASE_SEPARATOR, DIRECTED_RELATIONS, DIRECTED_RELATIONS_ACCELERATION
 
 class RandomWalk:
     initial_node_uri = ""
@@ -119,7 +119,14 @@ class RandomWalk:
             self.iterations_count += 1
             self.current_node_uri = self.initial_node_uri
 
-        relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri), columns = ["node2", "weight"])
+        is_directed = DIRECTED_RELATIONS
+
+        relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri, is_directed), columns = ["node2", "weight"])
+
+        if relations.empty and DIRECTED_RELATIONS_ACCELERATION and is_directed:
+            print("Accelerate choice")
+            is_directed = False
+            relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri, is_directed), columns = ["node2", "weight"])
 
         if relations.empty:
             if self.current_node_uri == self.initial_node_uri:
