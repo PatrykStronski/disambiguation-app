@@ -1,5 +1,5 @@
 from neo4j import GraphDatabase
-from config import DIRECTED_RELATIONS, CONCURRENT_RELATIONS_CREATION
+from config import CONCURRENT_RELATIONS_CREATION
 
 class Neo4jDb:
     URI = 'neo4j://neo_dest:7687/'
@@ -64,7 +64,7 @@ class Neo4jDb:
 
     def create_relations(self, node1_uri, node2_list):
         if len(node2_list) == 0:
-            print('No semsigns in ' + node1_uri);
+            print('No semsigns in ' + node1_uri)
             return
         node_qty = len(node2_list)
         print('Nodes to insert: ' + str(node_qty))

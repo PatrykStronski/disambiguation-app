@@ -48,7 +48,7 @@ def test_english_word():
 
 def test_english_sentence():
     sentence = "I have always dreamed about becoming a hero"
-    assert lem.lemmatize(sentence, "english") == ["-PRON-", "have", "always", "dream", "about", "become", "a", "hero"]
+    assert lem.lemmatize(sentence, "english") == ["I", "have", "always", "dream", "about", "become", "a", "hero"]
 
 def test_english_label_orth():
     sentence = "*labelled label*"
@@ -60,4 +60,4 @@ def test_english_word_orth():
 
 def test_english_sentence_orth():
     sentence = "I have always dreamed about becoming a hero"
-    assert lem.lemmatize_orth(sentence, "english") == (["-PRON-", "have", "always", "dream", "about", "become", "a", "hero"], ["I", "have", "always", "dreamed", "about", "becoming", "a", "hero"])
+    assert lem.lemmatize_orth(sentence, "english") == (["I", "have", "always", "dream", "about", "become", "a", "hero"], ["I", "have", "always", "dreamed", "about", "becoming", "a", "hero"])

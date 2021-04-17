@@ -18,7 +18,7 @@ process_dir()
   done
 }
 
-mkdir -p "/data/${dest_dir}/${set_name}"
+mkdir -p "${dest_dir}/${set_name}"
 process_dir "${src_dir}/${set_name}" "${dest_dir}/${set_name}"
 
 echo "\n !DONE ALL! \n"

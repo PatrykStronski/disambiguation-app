@@ -9,6 +9,7 @@ class Disambiguation:
     lemmatizer = Lemmatizer()
     ambiguity_level = 0.0
     disambiguation_threshold = 0.0
+
     def __init__(self, ambiguity_lvl = AMBIGUITY_LEVEL, disambiguation_threshold = DISAMBIGUATION_THRESHOLD):
         self.neo4j_mgr = Neo4jDisambiguation('neo4j')
         self.ambiguity_level = ambiguity_lvl

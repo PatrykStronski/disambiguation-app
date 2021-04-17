@@ -1,0 +1,5 @@
+ORDER_ID	TOKEN_ID	ORTH	LEMMA	CTAG	FROM	TO
+0	0	miasto	miasto	subst:sg:nom:n	23	28
+1	1	w	w	prep:loc:nwok	29	29
+2	2	Wielkiej	wielki	adj:sg:loc:f:pos	30	37
+3	3	Brytanii	Brytania	subst:sg:loc:f	38	45

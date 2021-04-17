@@ -1,7 +1,7 @@
 import csv
 import pandas as pd
 from utils.logger import Logger
-from config import CANDIDATES_FIELDS, CONLL_DELIMITER, POLEVAL_EXPORTED_FIELDS_UP, EXPORT_DIR, SENTENCE_DISTINCTION
+from config import CANDIDATES_FIELDS, CONLL_DELIMITER, POLEVAL_EXPORTED_FIELDS_UP, SENTENCE_DISTINCTION
 
 logger = Logger()
 
@@ -21,7 +21,7 @@ def write_conll(new_file, data, filename):
             if row.get("wn_id") != "_":
                 proposed_guesses += 1
             dict_wrt.writerow({key.upper(): row[key] for key in row.keys()})
-    logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
+    logger.successful("Output saved to " + filename + " file!")
     logger.successful("The assumed recall is: " + str(proposed_guesses/all_rows))
 
 def write_semeval_tsv(new_file, data, filename):
@@ -30,7 +30,7 @@ def write_semeval_tsv(new_file, data, filename):
         for row in sentence:
             if type(row["pwn_id"]) == str and row["pwn_id"] != "_":
                 dict_wrt.writerow({ "from": row["order_id"], "to": row["order_id"], "wnid": remove_comas(row["pwn_id"]) })
-    logger.successful("Output saved to " + EXPORT_DIR + filename + " file!")
+    logger.successful("Output saved to " + filename + " file!")
 
 def conll_read(parsed):
     data = pd.DataFrame(columns=CANDIDATES_FIELDS)
@@ -53,11 +53,11 @@ def distinct_sentences_conll(parsed):
     return data
 
 def read_input_data(filename, format):
-    """ parses data from files based on format and returns a DATAFRAME"""
+    """ parses data from files based on format and returns a [DATAFRAME]"""
     if not filename:
         logger.error("No Filename Chosen. Exiting!")
         return None
-    read_file = open(EXPORT_DIR + filename, newline="")
+    read_file = open(filename, newline="")
 
     if format == "conll":
         parsed = csv.DictReader(read_file, delimiter=CONLL_DELIMITER)
@@ -73,7 +73,7 @@ def create_output_file(filename, data, format):
     if not filename:
         logger.error("No Filename Chosen. Exiting!")
         return None
-    new_file = open(EXPORT_DIR + filename, "w", newline="")
+    new_file = open(filename, "w", newline="")
 
     if format == "conll":
         write_conll(new_file, data, filename)
