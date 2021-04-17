@@ -124,7 +124,7 @@ class RandomWalk:
         relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri, is_directed), columns = ["node2", "weight"])
 
         if relations.empty and DIRECTED_RELATIONS_ACCELERATION and is_directed:
-            print("Accelerate choice")
+            #print("Accelerate choice")
             is_directed = False
             relations = pd.DataFrame(self.neo4j_src.get_related_nodes_weighted(self.current_node_uri, self.princeton, self.initial_node_uri, is_directed), columns = ["node2", "weight"])
 
