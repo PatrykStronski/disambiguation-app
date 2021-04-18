@@ -169,7 +169,11 @@ class Disambiguation:
         candidates = merge_with_data(input_data, [self.neo4j_mgr.find_word_labels(token, lang) for token in input_data["lemma"].tolist()])
         print(candidates.shape)
         if candidates.empty:
-            return []
+            proposed_candidates = self.align_output(candidates, input_data)
+            if lang == "polish":
+                return filter_output(proposed_candidates, True)
+            else:
+                return filter_output(proposed_candidates, False)
         candidates = self.narrow_semantic_signature_sets(candidates)
         candidates = self.densest_subgraph(candidates)
         candidates = self.calculate_semantic_interconnections(candidates)
