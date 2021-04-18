@@ -1,6 +1,56 @@
 import pandas as pd
 from disambiguation.disambiguation import Disambiguation
 
+def test_narrow_semantic_signature_sets_simple():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": [], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.narrow_semantic_signature_sets(candidates)
+    assert candidates.iloc[0]["sign"] == ["http://a/w2"]
+    assert candidates.iloc[1]["sign"] == []
+    assert candidates.iloc[2]["sign"] == []
+
+def test_narrow_semantic_signature_sets_simple2():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": [], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w1", "http://a/w8"], "semantic_interconnections": 0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.narrow_semantic_signature_sets(candidates)
+    assert candidates.iloc[0]["sign"] == ["http://a/w2"]
+    assert candidates.iloc[1]["sign"] == []
+    assert candidates.iloc[2]["sign"] == ["http://a/w1"]
+
+def test_narrow_semantic_signature_sets_complex():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": ["http://a/w1"], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w1", "http://a/w8"], "semantic_interconnections": 0}
+    ])
+    dis = Disambiguation(5,0.2)
+    candidates = dis.narrow_semantic_signature_sets(candidates)
+    assert candidates.iloc[0]["sign"] == ["http://a/w2"]
+    assert candidates.iloc[1]["sign"] == ["http://a/w1"]
+    assert candidates.iloc[2]["sign"] == ["http://a/w1"]
+
+def test_narrow_semantic_signature_sets_complex():
+    candidates = pd.DataFrame([
+        {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w2", "lemma": "w2", "uri": "http://a/w2", "sign": ["http://a/w1"], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3", "sign": ["http://a/w9", "http://a/w8"], "semantic_interconnections": 0},
+        {"orth": "w3", "lemma": "w3", "uri": "http://a/w3.1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0}
+    ])
+    dis = Disambiguation(5, 0.2)
+    candidates = dis.narrow_semantic_signature_sets(candidates)
+    assert candidates.iloc[0]["sign"] == ["http://a/w2"]
+    assert candidates.iloc[1]["sign"] == ["http://a/w1"]
+    assert candidates.iloc[2]["sign"] == []
+    assert candidates.iloc[3]["sign"] == ["http://a/w2"]
+
 def test_calculate_semantic_interconnections_simple():
     candidates = pd.DataFrame([
         {"orth": "w1", "lemma": "w1", "uri": "http://a/w1", "sign": ["http://a/w2", "http://a/w8"], "semantic_interconnections": 0},

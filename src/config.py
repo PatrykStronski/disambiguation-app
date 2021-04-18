@@ -16,7 +16,7 @@ SLEEP_TIME_LEMMATIZER = 0.2
 ###DISAMBIGUATION
 
 DISAMBIGUATION_THRESHOLD = 0.01
-AMBIGUITY_LEVEL = 20
+AMBIGUITY_LEVEL = 100
 CANDIDATES_FIELDS = ["order_id", "token_id", "orth", "lemma", "uri", "ctag", "from", "to", "wn_id", "pwn_id", "deg", "semantic_interconnections", "semantic_in_connections", "score", "sign", "labels"]
 EXPORTED_FIELDS = ["token_id", "order_id", "orth", "lemma", "uri", "score", "labels", "pwn_id"]
 POLEVAL_EXPORTED_FIELDS = ["order_id", "token_id", "orth", "lemma", "ctag", "from", "to", "wn_id"]

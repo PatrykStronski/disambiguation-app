@@ -133,6 +133,21 @@ class Disambiguation:
         candidates["deg"] = 0
         return candidates.apply(lambda cand: self.count_interconnections_candidate(cand, candidates) if cand["lemma"] == lemma else cand, axis=1)
 
+    def narrow_candidate_semsign(self, cand, candidates):
+        new_semsigns = []
+        semsigns = cand["sign"]
+        lemma = cand["lemma"]
+        new_candidates = candidates.loc[candidates["lemma"] != lemma]
+        for entry in semsigns:
+            does_contain = not new_candidates.loc[new_candidates["uri"] == entry].empty
+            if does_contain:
+                new_semsigns.append(entry)
+        cand["sign"] = new_semsigns
+        return cand
+
+    def narrow_semantic_signature_sets(self, candidates):
+        return candidates.apply(lambda cand: self.narrow_candidate_semsign(cand, candidates), axis=1)
+
     def disambiguate_text(self, text, lang): #lang must be 'polish' or 'english'
         lemmatization_data = self.lemmatizer.lemmatize_orth(text, lang)
         tokens = lemmatization_data[0]
@@ -155,6 +170,7 @@ class Disambiguation:
         print(candidates.shape)
         if candidates.empty:
             return []
+        candidates = self.narrow_semantic_signature_sets(candidates)
         candidates = self.densest_subgraph(candidates)
         candidates = self.calculate_semantic_interconnections(candidates)
         candidates = self.calculate_score(candidates)

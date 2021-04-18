@@ -3,6 +3,7 @@ from utils.tsv_manager import read_input_data
 import os
 dis = Disambiguation(20, 0.05)
 
+
 def test_disambiguation_both_simple():
     sentence_pl = "Opaska przewiązana przez jej włosy była koloru czerwonego"
     sentence_en = "The frontlet tied on her forehead was colored red"
